@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package auth;
+
+message AuthReq {
+	 int32 uid = 1;
+     string name = 2;
+}
+
+message AuthResp {
+    int32 code = 1;
+    string msg = 2;
+}
