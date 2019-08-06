@@ -13,16 +13,17 @@ type requestI interface {
 }
 
 type responseI interface {
-	UnMarshal([]byte) error
+	Unmarshal([]byte) error
 }
 
-type methodHandler func(svr interface{}, ctx context.Context, req requestI, resp responseI) error
+type MethodHandler func(svr interface{}, ctx context.Context, req requestI, resp responseI) error
 
 // 方法类型
 type MethodType struct {
-	Name  string // 完整方法名 服务名.方法名
-	Alg   reflect.Value
-	Reply reflect.Value
+	Name    string // 完整方法名 服务名.方法名
+	Alg     reflect.Value
+	Reply   reflect.Value
+	Handler MethodHandler
 }
 
 type Service struct {
@@ -83,9 +84,10 @@ func (s *server) register(sd interface{}, name string, arg, reply interface{}) {
 		method := sdType.Method(i)
 		fmt.Println("method: ", method.Name)
 		me := MethodType{
-			Name:  method.Name,
-			Alg:   reflect.ValueOf(arg),
-			Reply: reflect.ValueOf(reply),
+			Name:    method.Name,
+			Alg:     reflect.ValueOf(arg),
+			Reply:   reflect.ValueOf(reply),
+			Handler: method.Func.Interface().(MethodHandler),
 		}
 		svr.Methods[method.Name] = me
 	}
