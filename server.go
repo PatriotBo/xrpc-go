@@ -16,6 +16,7 @@ type responseI interface {
 	Unmarshal([]byte) error
 }
 
+<<<<<<< HEAD
 type MethodHandler func(svr interface{}, ctx context.Context, req requestI, resp responseI) error
 
 // 方法类型
@@ -24,6 +25,15 @@ type MethodType struct {
 	Alg     reflect.Value
 	Reply   reflect.Value
 	Handler MethodHandler
+=======
+type methodHandler func(svr interface{}, ctx context.Context, req requestI, resp responseI) error
+
+// 方法类型
+type MethodType struct {
+	Name  string // 完整方法名 服务名.方法名
+	Alg   reflect.Value
+	Reply reflect.Value
+>>>>>>> 2d50a11b6136d4b7181c584f5d92b9d6546e4906
 }
 
 type Service struct {
@@ -84,10 +94,16 @@ func (s *server) register(sd interface{}, name string, arg, reply interface{}) {
 		method := sdType.Method(i)
 		fmt.Println("method: ", method.Name)
 		me := MethodType{
+<<<<<<< HEAD
 			Name:    method.Name,
 			Alg:     reflect.ValueOf(arg),
 			Reply:   reflect.ValueOf(reply),
 			Handler: method.Func.Interface().(MethodHandler),
+=======
+			Name:  method.Name,
+			Alg:   reflect.ValueOf(arg),
+			Reply: reflect.ValueOf(reply),
+>>>>>>> 2d50a11b6136d4b7181c584f5d92b9d6546e4906
 		}
 		svr.Methods[method.Name] = me
 	}
