@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"image/draw"
 	"reflect"
 	"sync"
 	"unsafe"
@@ -97,37 +96,7 @@ func (s *server) register(sd *ServiceDesc, ss interface{}) {
 		panic("found that register service while server is running")
 	}
 
-	if s, ok := s.ServiceMap.LoadOrStore(sd.ServiceName, srv); ok {
-
+	if _, ok := s.ServiceMap.LoadOrStore(sd.ServiceName, srv); !ok {
+		fmt.Println("register success")
 	}
 }
-
-//func (s *server) RegisterWithName(svr interface{}, name string, arg, reply interface{}) error {
-//	if len(name) <= 0 {
-//		return ErrNoName
-//	}
-//	s.register(svr, name, arg, reply)
-//	return nil
-//}
-
-//func (s *server) register(sd interface{}, name string, arg, reply interface{}) {
-//	svr := &ServiceDesc{
-//		ServiceName: name,
-//		Methods:     make([]MethodDesc, 0),
-//	}
-//
-//	sdType := reflect.TypeOf(sd)
-//	fmt.Println(sdType.NumMethod())
-//	for i := 0; i < sdType.NumMethod(); i++ {
-//		method := sdType.Method(i)
-//		fmt.Println("method: ", method.Name)
-//		me := MethodType{
-//			Name:  method.Name,
-//			Alg:   reflect.ValueOf(arg),
-//			Reply: reflect.ValueOf(reply),
-//		}
-//		svr.Methods[method.Name] = me
-//	}
-//
-//	s.ServiceMap.Store(name, svr) // 将服务注册进server
-//}
