@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 syntax = "proto2";
 
 package auth;
@@ -18,25 +17,11 @@ option (gogoproto.sizer_all) = true;
 option (gogoproto.unmarshaler_all) = true;
 
 message AuthReq {
-	optional int32 uid = 1;
-    optional string name = 2;
+	optional int32 uid = 1[(gogoproto.nullable) = false];
+    optional string name = 2[(gogoproto.nullable) = false];
 }
 
 message AuthResp {
-   optional int32 code = 1;
-   optional string msg = 2;
-=======
-syntax = "proto3";
-
-package auth;
-
-message AuthReq {
-	 int32 uid = 1;
-     string name = 2;
-}
-
-message AuthResp {
-    int32 code = 1;
-    string msg = 2;
->>>>>>> 2d50a11b6136d4b7181c584f5d92b9d6546e4906
+   optional int32 code = 1[(gogoproto.nullable) = false];
+   optional string msg = 2[(gogoproto.nullable) = false];
 }

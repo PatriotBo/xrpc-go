@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"image/draw"
 	"reflect"
 	"sync"
+	"unsafe"
 )
 
 type requestI interface {
@@ -16,29 +18,30 @@ type responseI interface {
 	Unmarshal([]byte) error
 }
 
-<<<<<<< HEAD
-type MethodHandler func(svr interface{}, ctx context.Context, req requestI, resp responseI) error
-
-// 方法类型
-type MethodType struct {
-	Name    string // 完整方法名 服务名.方法名
-	Alg     reflect.Value
-	Reply   reflect.Value
-	Handler MethodHandler
-=======
-type methodHandler func(svr interface{}, ctx context.Context, req requestI, resp responseI) error
+type methodHandler func(svr interface{}, ctx context.Context, req interface{}, resp unsafe.Pointer) error
 
 // 方法类型
 type MethodType struct {
 	Name  string // 完整方法名 服务名.方法名
 	Alg   reflect.Value
 	Reply reflect.Value
->>>>>>> 2d50a11b6136d4b7181c584f5d92b9d6546e4906
 }
 
-type Service struct {
+type MethodDesc struct {
+	MethodName string
+	Handler    methodHandler
+}
+
+type ServiceDesc struct {
+	ServiceName string
+	HandlerType interface{}
+	Methods     []MethodDesc
+}
+
+type service struct {
 	Name    string
-	Methods map[string]MethodType
+	server  interface{}
+	methods map[string]MethodDesc
 }
 
 type Request struct {
@@ -74,39 +77,57 @@ var (
 )
 
 // 注册服务
-func (s *server) RegisterWithName(svr interface{}, name string, arg, reply interface{}) error {
-	if len(name) <= 0 {
-		return ErrNoName
+func (s *server) RegisterService(sd *ServiceDesc, ss interface{}) {
+	handleType := reflect.TypeOf(sd.HandlerType).Elem()
+	serviceType := reflect.TypeOf(ss)
+	if !serviceType.Implements(handleType) {
+		panic(fmt.Sprintf("found the type %v does not satisfy %v", serviceType, handleType))
 	}
-	s.register(svr, name, arg, reply)
-	return nil
+	s.register(sd, ss)
 }
 
-func (s *server) register(sd interface{}, name string, arg, reply interface{}) {
-	svr := &Service{
-		Name:    name,
-		Methods: make(map[string]MethodType),
+func (s *server) register(sd *ServiceDesc, ss interface{}) {
+	srv := &service{
+		Name:    sd.ServiceName,
+		server:  ss,
+		methods: make(map[string]MethodDesc),
 	}
 
-	sdType := reflect.TypeOf(sd)
-	fmt.Println(sdType.NumMethod())
-	for i := 0; i < sdType.NumMethod(); i++ {
-		method := sdType.Method(i)
-		fmt.Println("method: ", method.Name)
-		me := MethodType{
-<<<<<<< HEAD
-			Name:    method.Name,
-			Alg:     reflect.ValueOf(arg),
-			Reply:   reflect.ValueOf(reply),
-			Handler: method.Func.Interface().(MethodHandler),
-=======
-			Name:  method.Name,
-			Alg:   reflect.ValueOf(arg),
-			Reply: reflect.ValueOf(reply),
->>>>>>> 2d50a11b6136d4b7181c584f5d92b9d6546e4906
-		}
-		svr.Methods[method.Name] = me
+	if s.serve {
+		panic("found that register service while server is running")
 	}
 
-	s.ServiceMap.Store(name, svr) // 将服务注册进server
+	if s, ok := s.ServiceMap.LoadOrStore(sd.ServiceName, srv); ok {
+
+	}
 }
+
+//func (s *server) RegisterWithName(svr interface{}, name string, arg, reply interface{}) error {
+//	if len(name) <= 0 {
+//		return ErrNoName
+//	}
+//	s.register(svr, name, arg, reply)
+//	return nil
+//}
+
+//func (s *server) register(sd interface{}, name string, arg, reply interface{}) {
+//	svr := &ServiceDesc{
+//		ServiceName: name,
+//		Methods:     make([]MethodDesc, 0),
+//	}
+//
+//	sdType := reflect.TypeOf(sd)
+//	fmt.Println(sdType.NumMethod())
+//	for i := 0; i < sdType.NumMethod(); i++ {
+//		method := sdType.Method(i)
+//		fmt.Println("method: ", method.Name)
+//		me := MethodType{
+//			Name:  method.Name,
+//			Alg:   reflect.ValueOf(arg),
+//			Reply: reflect.ValueOf(reply),
+//		}
+//		svr.Methods[method.Name] = me
+//	}
+//
+//	s.ServiceMap.Store(name, svr) // 将服务注册进server
+//}
