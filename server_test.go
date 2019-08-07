@@ -4,17 +4,17 @@ import (
 	"context"
 	"fmt"
 	"testing"
-	"unsafe"
 	"xrpc-go/proto/auth"
 )
 
 type AuthServer interface {
-	Get(ctx context.Context, req auth.AuthReq, resp *auth.AuthResp) error
+	Get(ctx context.Context, req auth.AuthReq) (*auth.AuthResp,error)
 }
 
-func _Get_Handler(svr interface{}, ctx context.Context, req interface{}, resp unsafe.Pointer) error {
+func _Get_Handler(svr interface{}, ctx context.Context, req interface{},body []byte)(protoI, error) {
 	fmt.Println("_Get_Handler")
-	return svr.(AuthServer).Get(ctx, req.(auth.AuthReq), (*auth.AuthResp)(resp))
+	req.(protoI).Unmarshal(body)
+	return svr.(AuthServer).Get(ctx, req.(auth.AuthReq))
 }
 
 type Auth struct {
@@ -22,16 +22,16 @@ type Auth struct {
 
 var mAuth = &Auth{}
 
-func (a *Auth) Get(ctx context.Context, req auth.AuthReq, resp *auth.AuthResp) error {
+func (a *Auth) Get(ctx context.Context, req auth.AuthReq)(*auth.AuthResp, error) {
 	uid := req.GetUid()
 	name := req.GetName()
-
+	resp := new(auth.AuthResp)
 	fmt.Printf("uid = %d, name = %s \n", uid, name)
-	return nil
+	return resp, nil
 }
 
 func TestRegister(t *testing.T) {
-	server := NewServer(1, 1)
+	server := NewServer("127.0.0.1", 8090)
 	sd := &ServiceDesc{
 		ServiceName: "api-auth",
 		HandlerType: (*AuthServer)(nil),
@@ -47,10 +47,10 @@ func TestRegister(t *testing.T) {
 	if s, ok := server.ServiceMap.Load("api-auth"); ok {
 		fmt.Println("-------------------")
 		req := new(auth.AuthReq)
-		resp := new(auth.AuthResp)
-		err := s.(AuthServer).Get(context.TODO(), *req, resp)
+		//s.(service).methods["Get"].Handler()
+		resp, err := s.(AuthServer).Get(context.TODO(), *req)
 		if err != nil {
-			fmt.Println("call service api-auth.Get failed: ", err)
+			fmt.Println("call service api-auth.Get failed: ", err,resp)
 		}
 	}
 }

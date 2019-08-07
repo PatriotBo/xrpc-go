@@ -1,0 +1,33 @@
+syntax = "proto2";
+
+package pbBase;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.gostring_all) = true;
+option (gogoproto.equal_all) = true;
+option (gogoproto.verbose_equal_all) = true;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) = true;
+option (gogoproto.populate_all) = true;
+option (gogoproto.testgen_all) = true;
+option (gogoproto.benchgen_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+
+// socket请求包数据结构
+message RpcReq {
+    optional string rpc  = 1; // 服务名称
+    optional string body = 2; // 请求包体
+    optional string ext  = 3; // 扩展字段
+}
+
+// socket返回数据结构
+message RpcResp {
+    optional string rpc  = 1; // 服务名称
+    optional string body = 2; // 包体
+    optional string ext  = 3; // 扩展字段
+    optional int32  code = 4; // 返回码
+}
+

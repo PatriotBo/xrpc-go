@@ -4,27 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"net"
 	"reflect"
+	"strings"
 	"sync"
-	"unsafe"
+	"xrpc-go/proto/base"
 )
 
-type requestI interface {
+type protoI interface {
 	Marshal() ([]byte, error)
-}
-
-type responseI interface {
 	Unmarshal([]byte) error
 }
 
-type methodHandler func(svr interface{}, ctx context.Context, req interface{}, resp unsafe.Pointer) error
-
-// 方法类型
-type MethodType struct {
-	Name  string // 完整方法名 服务名.方法名
-	Alg   reflect.Value
-	Reply reflect.Value
-}
+type methodHandler func(svr interface{}, ctx context.Context, req interface{},body []byte)(protoI, error)
 
 type MethodDesc struct {
 	MethodName string
@@ -43,31 +36,19 @@ type service struct {
 	methods map[string]MethodDesc
 }
 
-type Request struct {
-	Sname string // 服务名
-	Mname string // 方法名
-	Body  []byte // 请求内容 参数等信息
-
-	//lock sync.Mutex
-}
-
-type Response struct {
-	Sname string // 服务名
-	Mname string // 方法名
-	Body  []byte // 响应内容
-}
-
 type server struct {
 	ServiceMap sync.Map // 一个server可提供多个服务 map[string]*service
 	serve      bool     // 服务是否开启
-	SId        int32
-	SType      int32
+	conns      map[net.Conn]bool // 管理该server上的所有连接，stop时主动关闭所有连接
+	sIp        string
+	sPort      int
 }
 
-func NewServer(sid, stype int32) *server {
+func NewServer(ip string, port int) *server {
 	return &server{
-		SId:   sid,
-		SType: stype,
+		sIp:ip,
+		sPort: port,
+		conns: make(map[net.Conn]bool),
 	}
 }
 
@@ -99,4 +80,102 @@ func (s *server) register(sd *ServiceDesc, ss interface{}) {
 	if _, ok := s.ServiceMap.LoadOrStore(sd.ServiceName, srv); !ok {
 		fmt.Println("register success")
 	}
+}
+
+// 启动服务
+func (s *server)Serve()error{
+	addr := fmt.Sprintf("%s:%d",s.sIp, s.sPort)
+	listener, err := net.Listen("tcp",addr)
+	if err != nil {
+		fmt.Println("net.Listen failed: ",err)
+		return err
+	}
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println("conn accept failed: ",err)
+			continue
+		}
+		s.conns[conn] = true
+		// 处理连接
+		go s.handleConn(conn)
+	}
+}
+
+func (s *server)handleConn(c net.Conn){
+	fmt.Println("conn established from remote addr: ",c.RemoteAddr().String())
+	for {
+		_, body, err := readRequest(c)
+		if err != nil {
+			fmt.Println("readRequest failed:")
+			continue
+		}
+
+		// 开启goroutine 处理请求
+		go s.handleRequest(c, body)
+	}
+}
+
+// 解析请求数据包
+func readRequest(c net.Conn)(header *RpcHead,body []byte,err error){
+	hb := make([]byte,RPC_HEAD_SIZE)
+	_, err = io.ReadFull(c,hb)
+	if err != nil {
+		fmt.Println("read head failed: ",err)
+		return
+	}
+
+	header, err = ParseHead(hb)
+	if err != nil {
+		return
+	}
+
+	body = make([]byte,header.Len)
+	_, err = io.ReadFull(c,body)
+	if err != nil {
+		fmt.Println("read body failed:",err)
+		return
+	}
+	return
+}
+
+func (s *server)handleRequest(c net.Conn,body []byte){
+	rpcReq := new(pbBase.RpcReq)
+	if err := rpcReq.Unmarshal(body); err != nil {
+		fmt.Println("unmarshal socket body failed:",err)
+		return
+	}
+
+	svrName := rpcReq.GetRpc() // 获取服务名 api-auth.Get
+	sn, mn, err := checkServiceName(svrName)
+	if err != nil {
+		return
+	}
+	if srv, ok := s.ServiceMap.Load(sn);ok {
+		if method,ok := srv.(service).methods[mn]; ok {
+
+			resp, err := method.Handler(srv.(service).server,context.TODO(),rpcReq,[]byte(rpcReq.GetBody()))
+			if err != nil {
+
+			}
+			body,err := resp.Marshal()
+
+		}
+		fmt.Printf("method %s not found in service %s\n",mn,sn)
+		return
+	}
+
+}
+
+func checkServiceName(name string)(sn,mn string,err error){
+	full := strings.Split(name,".")
+	if len(full) != 2 {
+		fmt.Println("bad service name: ",name)
+		err = errors.New(fmt.Sprintf("bad service name %s",name))
+		return
+	}
+	sn = full[0]
+	mn = full[1]
+	return
 }
