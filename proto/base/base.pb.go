@@ -3,17 +3,17 @@
 
 package pbBase
 
-import proto "github.com/gogo/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import _ "github.com/gogo/protobuf/gogoproto"
-
-import bytes "bytes"
-
-import strings "strings"
-import reflect "reflect"
-
-import io "io"
+import (
+	bytes "bytes"
+	fmt "fmt"
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -26,11 +26,57 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
 
+type RpcCode int32
+
+const (
+	RpcCode_SUCCESS   RpcCode = 0
+	RpcCode_TIMEOUT   RpcCode = 1
+	RpcCode_ERR       RpcCode = 2
+	RpcCode_NOT_FOUND RpcCode = 3
+)
+
+var RpcCode_name = map[int32]string{
+	0: "SUCCESS",
+	1: "TIMEOUT",
+	2: "ERR",
+	3: "NOT_FOUND",
+}
+
+var RpcCode_value = map[string]int32{
+	"SUCCESS":   0,
+	"TIMEOUT":   1,
+	"ERR":       2,
+	"NOT_FOUND": 3,
+}
+
+func (x RpcCode) Enum() *RpcCode {
+	p := new(RpcCode)
+	*p = x
+	return p
+}
+
+func (x RpcCode) String() string {
+	return proto.EnumName(RpcCode_name, int32(x))
+}
+
+func (x *RpcCode) UnmarshalJSON(data []byte) error {
+	value, err := proto.UnmarshalJSONEnum(RpcCode_value, data, "RpcCode")
+	if err != nil {
+		return err
+	}
+	*x = RpcCode(value)
+	return nil
+}
+
+func (RpcCode) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_d66ec2e140567106, []int{0}
+}
+
 // socket请求包数据结构
 type RpcReq struct {
-	Rpc                  *string  `protobuf:"bytes,1,opt,name=rpc" json:"rpc,omitempty"`
-	Body                 *string  `protobuf:"bytes,2,opt,name=body" json:"body,omitempty"`
-	Ext                  *string  `protobuf:"bytes,3,opt,name=ext" json:"ext,omitempty"`
+	Rpc                  string   `protobuf:"bytes,1,opt,name=rpc" json:"rpc"`
+	Body                 string   `protobuf:"bytes,2,opt,name=body" json:"body"`
+	Ext                  string   `protobuf:"bytes,3,opt,name=ext" json:"ext"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -39,7 +85,7 @@ type RpcReq struct {
 func (m *RpcReq) Reset()      { *m = RpcReq{} }
 func (*RpcReq) ProtoMessage() {}
 func (*RpcReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_base_6a099303bf16be58, []int{0}
+	return fileDescriptor_d66ec2e140567106, []int{0}
 }
 func (m *RpcReq) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -49,15 +95,15 @@ func (m *RpcReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return xxx_messageInfo_RpcReq.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
 		return b[:n], nil
 	}
 }
-func (dst *RpcReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RpcReq.Merge(dst, src)
+func (m *RpcReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RpcReq.Merge(m, src)
 }
 func (m *RpcReq) XXX_Size() int {
 	return m.Size()
@@ -69,32 +115,32 @@ func (m *RpcReq) XXX_DiscardUnknown() {
 var xxx_messageInfo_RpcReq proto.InternalMessageInfo
 
 func (m *RpcReq) GetRpc() string {
-	if m != nil && m.Rpc != nil {
-		return *m.Rpc
+	if m != nil {
+		return m.Rpc
 	}
 	return ""
 }
 
 func (m *RpcReq) GetBody() string {
-	if m != nil && m.Body != nil {
-		return *m.Body
+	if m != nil {
+		return m.Body
 	}
 	return ""
 }
 
 func (m *RpcReq) GetExt() string {
-	if m != nil && m.Ext != nil {
-		return *m.Ext
+	if m != nil {
+		return m.Ext
 	}
 	return ""
 }
 
 // socket返回数据结构
 type RpcResp struct {
-	Rpc                  *string  `protobuf:"bytes,1,opt,name=rpc" json:"rpc,omitempty"`
-	Body                 *string  `protobuf:"bytes,2,opt,name=body" json:"body,omitempty"`
-	Ext                  *string  `protobuf:"bytes,3,opt,name=ext" json:"ext,omitempty"`
-	Code                 *int32   `protobuf:"varint,4,opt,name=code" json:"code,omitempty"`
+	Rpc                  string   `protobuf:"bytes,1,opt,name=rpc" json:"rpc"`
+	Body                 string   `protobuf:"bytes,2,opt,name=body" json:"body"`
+	Ext                  string   `protobuf:"bytes,3,opt,name=ext" json:"ext"`
+	Code                 int32    `protobuf:"varint,4,opt,name=code" json:"code"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -103,7 +149,7 @@ type RpcResp struct {
 func (m *RpcResp) Reset()      { *m = RpcResp{} }
 func (*RpcResp) ProtoMessage() {}
 func (*RpcResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_base_6a099303bf16be58, []int{1}
+	return fileDescriptor_d66ec2e140567106, []int{1}
 }
 func (m *RpcResp) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -113,15 +159,15 @@ func (m *RpcResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return xxx_messageInfo_RpcResp.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
 		return b[:n], nil
 	}
 }
-func (dst *RpcResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RpcResp.Merge(dst, src)
+func (m *RpcResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RpcResp.Merge(m, src)
 }
 func (m *RpcResp) XXX_Size() int {
 	return m.Size()
@@ -133,37 +179,62 @@ func (m *RpcResp) XXX_DiscardUnknown() {
 var xxx_messageInfo_RpcResp proto.InternalMessageInfo
 
 func (m *RpcResp) GetRpc() string {
-	if m != nil && m.Rpc != nil {
-		return *m.Rpc
+	if m != nil {
+		return m.Rpc
 	}
 	return ""
 }
 
 func (m *RpcResp) GetBody() string {
-	if m != nil && m.Body != nil {
-		return *m.Body
+	if m != nil {
+		return m.Body
 	}
 	return ""
 }
 
 func (m *RpcResp) GetExt() string {
-	if m != nil && m.Ext != nil {
-		return *m.Ext
+	if m != nil {
+		return m.Ext
 	}
 	return ""
 }
 
 func (m *RpcResp) GetCode() int32 {
-	if m != nil && m.Code != nil {
-		return *m.Code
+	if m != nil {
+		return m.Code
 	}
 	return 0
 }
 
 func init() {
+	proto.RegisterEnum("pbBase.RpcCode", RpcCode_name, RpcCode_value)
 	proto.RegisterType((*RpcReq)(nil), "pbBase.RpcReq")
 	proto.RegisterType((*RpcResp)(nil), "pbBase.RpcResp")
 }
+
+func init() { proto.RegisterFile("base/base.proto", fileDescriptor_d66ec2e140567106) }
+
+var fileDescriptor_d66ec2e140567106 = []byte{
+	// 266 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4f, 0x4a, 0x2c, 0x4e,
+	0xd5, 0x07, 0x11, 0x7a, 0x05, 0x45, 0xf9, 0x25, 0xf9, 0x42, 0x6c, 0x05, 0x49, 0x4e, 0x89, 0xc5,
+	0xa9, 0x52, 0xba, 0xe9, 0x99, 0x25, 0x19, 0xa5, 0x49, 0x7a, 0xc9, 0xf9, 0xb9, 0xfa, 0xe9, 0xf9,
+	0xe9, 0xf9, 0xfa, 0x60, 0xe9, 0xa4, 0xd2, 0x34, 0x30, 0x0f, 0xcc, 0x01, 0xb3, 0x20, 0xda, 0x94,
+	0x82, 0xb8, 0xd8, 0x82, 0x0a, 0x92, 0x83, 0x52, 0x0b, 0x85, 0xc4, 0xb8, 0x98, 0x8b, 0x0a, 0x92,
+	0x25, 0x18, 0x15, 0x18, 0x35, 0x38, 0x9d, 0x58, 0x4e, 0xdc, 0x93, 0x67, 0x08, 0x02, 0x09, 0x08,
+	0x49, 0x70, 0xb1, 0x24, 0xe5, 0xa7, 0x54, 0x4a, 0x30, 0x21, 0x49, 0x80, 0x45, 0x40, 0x3a, 0x52,
+	0x2b, 0x4a, 0x24, 0x98, 0x91, 0x75, 0xa4, 0x56, 0x94, 0x28, 0xe5, 0x72, 0xb1, 0x83, 0xcd, 0x2c,
+	0x2e, 0xa0, 0x9e, 0xa1, 0x20, 0x1d, 0xc9, 0xf9, 0x29, 0xa9, 0x12, 0x2c, 0x0a, 0x8c, 0x1a, 0xac,
+	0x30, 0x1d, 0x20, 0x11, 0x2d, 0x6b, 0xb0, 0x75, 0xce, 0xf9, 0x29, 0xa9, 0x42, 0xdc, 0x5c, 0xec,
+	0xc1, 0xa1, 0xce, 0xce, 0xae, 0xc1, 0xc1, 0x02, 0x0c, 0x20, 0x4e, 0x88, 0xa7, 0xaf, 0xab, 0x7f,
+	0x68, 0x88, 0x00, 0xa3, 0x10, 0x3b, 0x17, 0xb3, 0x6b, 0x50, 0x90, 0x00, 0x93, 0x10, 0x2f, 0x17,
+	0xa7, 0x9f, 0x7f, 0x48, 0xbc, 0x9b, 0x7f, 0xa8, 0x9f, 0x8b, 0x00, 0xb3, 0x93, 0xce, 0x8d, 0x87,
+	0x72, 0x0c, 0x0f, 0x1e, 0xca, 0x31, 0x7e, 0x78, 0x28, 0xc7, 0xf8, 0xe3, 0xa1, 0x1c, 0x63, 0xc3,
+	0x23, 0x39, 0xc6, 0x15, 0x8f, 0xe4, 0x18, 0x77, 0x3c, 0x92, 0x63, 0x3c, 0xf0, 0x48, 0x8e, 0xf1,
+	0xc4, 0x23, 0x39, 0xc6, 0x0b, 0x8f, 0xe4, 0x18, 0x1f, 0x3c, 0x92, 0x63, 0x04, 0x04, 0x00, 0x00,
+	0xff, 0xff, 0xef, 0x37, 0x81, 0x87, 0x76, 0x01, 0x00, 0x00,
+}
+
 func (this *RpcReq) VerboseEqual(that interface{}) error {
 	if that == nil {
 		if this == nil {
@@ -189,31 +260,13 @@ func (this *RpcReq) VerboseEqual(that interface{}) error {
 	} else if this == nil {
 		return fmt.Errorf("that is type *RpcReq but is not nil && this == nil")
 	}
-	if this.Rpc != nil && that1.Rpc != nil {
-		if *this.Rpc != *that1.Rpc {
-			return fmt.Errorf("Rpc this(%v) Not Equal that(%v)", *this.Rpc, *that1.Rpc)
-		}
-	} else if this.Rpc != nil {
-		return fmt.Errorf("this.Rpc == nil && that.Rpc != nil")
-	} else if that1.Rpc != nil {
+	if this.Rpc != that1.Rpc {
 		return fmt.Errorf("Rpc this(%v) Not Equal that(%v)", this.Rpc, that1.Rpc)
 	}
-	if this.Body != nil && that1.Body != nil {
-		if *this.Body != *that1.Body {
-			return fmt.Errorf("Body this(%v) Not Equal that(%v)", *this.Body, *that1.Body)
-		}
-	} else if this.Body != nil {
-		return fmt.Errorf("this.Body == nil && that.Body != nil")
-	} else if that1.Body != nil {
+	if this.Body != that1.Body {
 		return fmt.Errorf("Body this(%v) Not Equal that(%v)", this.Body, that1.Body)
 	}
-	if this.Ext != nil && that1.Ext != nil {
-		if *this.Ext != *that1.Ext {
-			return fmt.Errorf("Ext this(%v) Not Equal that(%v)", *this.Ext, *that1.Ext)
-		}
-	} else if this.Ext != nil {
-		return fmt.Errorf("this.Ext == nil && that.Ext != nil")
-	} else if that1.Ext != nil {
+	if this.Ext != that1.Ext {
 		return fmt.Errorf("Ext this(%v) Not Equal that(%v)", this.Ext, that1.Ext)
 	}
 	if !bytes.Equal(this.XXX_unrecognized, that1.XXX_unrecognized) {
@@ -240,31 +293,13 @@ func (this *RpcReq) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.Rpc != nil && that1.Rpc != nil {
-		if *this.Rpc != *that1.Rpc {
-			return false
-		}
-	} else if this.Rpc != nil {
-		return false
-	} else if that1.Rpc != nil {
+	if this.Rpc != that1.Rpc {
 		return false
 	}
-	if this.Body != nil && that1.Body != nil {
-		if *this.Body != *that1.Body {
-			return false
-		}
-	} else if this.Body != nil {
-		return false
-	} else if that1.Body != nil {
+	if this.Body != that1.Body {
 		return false
 	}
-	if this.Ext != nil && that1.Ext != nil {
-		if *this.Ext != *that1.Ext {
-			return false
-		}
-	} else if this.Ext != nil {
-		return false
-	} else if that1.Ext != nil {
+	if this.Ext != that1.Ext {
 		return false
 	}
 	if !bytes.Equal(this.XXX_unrecognized, that1.XXX_unrecognized) {
@@ -297,40 +332,16 @@ func (this *RpcResp) VerboseEqual(that interface{}) error {
 	} else if this == nil {
 		return fmt.Errorf("that is type *RpcResp but is not nil && this == nil")
 	}
-	if this.Rpc != nil && that1.Rpc != nil {
-		if *this.Rpc != *that1.Rpc {
-			return fmt.Errorf("Rpc this(%v) Not Equal that(%v)", *this.Rpc, *that1.Rpc)
-		}
-	} else if this.Rpc != nil {
-		return fmt.Errorf("this.Rpc == nil && that.Rpc != nil")
-	} else if that1.Rpc != nil {
+	if this.Rpc != that1.Rpc {
 		return fmt.Errorf("Rpc this(%v) Not Equal that(%v)", this.Rpc, that1.Rpc)
 	}
-	if this.Body != nil && that1.Body != nil {
-		if *this.Body != *that1.Body {
-			return fmt.Errorf("Body this(%v) Not Equal that(%v)", *this.Body, *that1.Body)
-		}
-	} else if this.Body != nil {
-		return fmt.Errorf("this.Body == nil && that.Body != nil")
-	} else if that1.Body != nil {
+	if this.Body != that1.Body {
 		return fmt.Errorf("Body this(%v) Not Equal that(%v)", this.Body, that1.Body)
 	}
-	if this.Ext != nil && that1.Ext != nil {
-		if *this.Ext != *that1.Ext {
-			return fmt.Errorf("Ext this(%v) Not Equal that(%v)", *this.Ext, *that1.Ext)
-		}
-	} else if this.Ext != nil {
-		return fmt.Errorf("this.Ext == nil && that.Ext != nil")
-	} else if that1.Ext != nil {
+	if this.Ext != that1.Ext {
 		return fmt.Errorf("Ext this(%v) Not Equal that(%v)", this.Ext, that1.Ext)
 	}
-	if this.Code != nil && that1.Code != nil {
-		if *this.Code != *that1.Code {
-			return fmt.Errorf("Code this(%v) Not Equal that(%v)", *this.Code, *that1.Code)
-		}
-	} else if this.Code != nil {
-		return fmt.Errorf("this.Code == nil && that.Code != nil")
-	} else if that1.Code != nil {
+	if this.Code != that1.Code {
 		return fmt.Errorf("Code this(%v) Not Equal that(%v)", this.Code, that1.Code)
 	}
 	if !bytes.Equal(this.XXX_unrecognized, that1.XXX_unrecognized) {
@@ -357,40 +368,16 @@ func (this *RpcResp) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.Rpc != nil && that1.Rpc != nil {
-		if *this.Rpc != *that1.Rpc {
-			return false
-		}
-	} else if this.Rpc != nil {
-		return false
-	} else if that1.Rpc != nil {
+	if this.Rpc != that1.Rpc {
 		return false
 	}
-	if this.Body != nil && that1.Body != nil {
-		if *this.Body != *that1.Body {
-			return false
-		}
-	} else if this.Body != nil {
-		return false
-	} else if that1.Body != nil {
+	if this.Body != that1.Body {
 		return false
 	}
-	if this.Ext != nil && that1.Ext != nil {
-		if *this.Ext != *that1.Ext {
-			return false
-		}
-	} else if this.Ext != nil {
-		return false
-	} else if that1.Ext != nil {
+	if this.Ext != that1.Ext {
 		return false
 	}
-	if this.Code != nil && that1.Code != nil {
-		if *this.Code != *that1.Code {
-			return false
-		}
-	} else if this.Code != nil {
-		return false
-	} else if that1.Code != nil {
+	if this.Code != that1.Code {
 		return false
 	}
 	if !bytes.Equal(this.XXX_unrecognized, that1.XXX_unrecognized) {
@@ -404,15 +391,9 @@ func (this *RpcReq) GoString() string {
 	}
 	s := make([]string, 0, 7)
 	s = append(s, "&pbBase.RpcReq{")
-	if this.Rpc != nil {
-		s = append(s, "Rpc: "+valueToGoStringBase(this.Rpc, "string")+",\n")
-	}
-	if this.Body != nil {
-		s = append(s, "Body: "+valueToGoStringBase(this.Body, "string")+",\n")
-	}
-	if this.Ext != nil {
-		s = append(s, "Ext: "+valueToGoStringBase(this.Ext, "string")+",\n")
-	}
+	s = append(s, "Rpc: "+fmt.Sprintf("%#v", this.Rpc)+",\n")
+	s = append(s, "Body: "+fmt.Sprintf("%#v", this.Body)+",\n")
+	s = append(s, "Ext: "+fmt.Sprintf("%#v", this.Ext)+",\n")
 	if this.XXX_unrecognized != nil {
 		s = append(s, "XXX_unrecognized:"+fmt.Sprintf("%#v", this.XXX_unrecognized)+",\n")
 	}
@@ -425,18 +406,10 @@ func (this *RpcResp) GoString() string {
 	}
 	s := make([]string, 0, 8)
 	s = append(s, "&pbBase.RpcResp{")
-	if this.Rpc != nil {
-		s = append(s, "Rpc: "+valueToGoStringBase(this.Rpc, "string")+",\n")
-	}
-	if this.Body != nil {
-		s = append(s, "Body: "+valueToGoStringBase(this.Body, "string")+",\n")
-	}
-	if this.Ext != nil {
-		s = append(s, "Ext: "+valueToGoStringBase(this.Ext, "string")+",\n")
-	}
-	if this.Code != nil {
-		s = append(s, "Code: "+valueToGoStringBase(this.Code, "int32")+",\n")
-	}
+	s = append(s, "Rpc: "+fmt.Sprintf("%#v", this.Rpc)+",\n")
+	s = append(s, "Body: "+fmt.Sprintf("%#v", this.Body)+",\n")
+	s = append(s, "Ext: "+fmt.Sprintf("%#v", this.Ext)+",\n")
+	s = append(s, "Code: "+fmt.Sprintf("%#v", this.Code)+",\n")
 	if this.XXX_unrecognized != nil {
 		s = append(s, "XXX_unrecognized:"+fmt.Sprintf("%#v", this.XXX_unrecognized)+",\n")
 	}
@@ -454,7 +427,7 @@ func valueToGoStringBase(v interface{}, typ string) string {
 func (m *RpcReq) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -462,38 +435,41 @@ func (m *RpcReq) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *RpcReq) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *RpcReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.Rpc != nil {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintBase(dAtA, i, uint64(len(*m.Rpc)))
-		i += copy(dAtA[i:], *m.Rpc)
-	}
-	if m.Body != nil {
-		dAtA[i] = 0x12
-		i++
-		i = encodeVarintBase(dAtA, i, uint64(len(*m.Body)))
-		i += copy(dAtA[i:], *m.Body)
-	}
-	if m.Ext != nil {
-		dAtA[i] = 0x1a
-		i++
-		i = encodeVarintBase(dAtA, i, uint64(len(*m.Ext)))
-		i += copy(dAtA[i:], *m.Ext)
-	}
 	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	return i, nil
+	i -= len(m.Ext)
+	copy(dAtA[i:], m.Ext)
+	i = encodeVarintBase(dAtA, i, uint64(len(m.Ext)))
+	i--
+	dAtA[i] = 0x1a
+	i -= len(m.Body)
+	copy(dAtA[i:], m.Body)
+	i = encodeVarintBase(dAtA, i, uint64(len(m.Body)))
+	i--
+	dAtA[i] = 0x12
+	i -= len(m.Rpc)
+	copy(dAtA[i:], m.Rpc)
+	i = encodeVarintBase(dAtA, i, uint64(len(m.Rpc)))
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
 }
 
 func (m *RpcResp) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -501,62 +477,56 @@ func (m *RpcResp) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *RpcResp) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *RpcResp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.Rpc != nil {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintBase(dAtA, i, uint64(len(*m.Rpc)))
-		i += copy(dAtA[i:], *m.Rpc)
-	}
-	if m.Body != nil {
-		dAtA[i] = 0x12
-		i++
-		i = encodeVarintBase(dAtA, i, uint64(len(*m.Body)))
-		i += copy(dAtA[i:], *m.Body)
-	}
-	if m.Ext != nil {
-		dAtA[i] = 0x1a
-		i++
-		i = encodeVarintBase(dAtA, i, uint64(len(*m.Ext)))
-		i += copy(dAtA[i:], *m.Ext)
-	}
-	if m.Code != nil {
-		dAtA[i] = 0x20
-		i++
-		i = encodeVarintBase(dAtA, i, uint64(*m.Code))
-	}
 	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	return i, nil
+	i = encodeVarintBase(dAtA, i, uint64(m.Code))
+	i--
+	dAtA[i] = 0x20
+	i -= len(m.Ext)
+	copy(dAtA[i:], m.Ext)
+	i = encodeVarintBase(dAtA, i, uint64(len(m.Ext)))
+	i--
+	dAtA[i] = 0x1a
+	i -= len(m.Body)
+	copy(dAtA[i:], m.Body)
+	i = encodeVarintBase(dAtA, i, uint64(len(m.Body)))
+	i--
+	dAtA[i] = 0x12
+	i -= len(m.Rpc)
+	copy(dAtA[i:], m.Rpc)
+	i = encodeVarintBase(dAtA, i, uint64(len(m.Rpc)))
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
 }
 
 func encodeVarintBase(dAtA []byte, offset int, v uint64) int {
+	offset -= sovBase(v)
+	base := offset
 	for v >= 1<<7 {
 		dAtA[offset] = uint8(v&0x7f | 0x80)
 		v >>= 7
 		offset++
 	}
 	dAtA[offset] = uint8(v)
-	return offset + 1
+	return base
 }
 func NewPopulatedRpcReq(r randyBase, easy bool) *RpcReq {
 	this := &RpcReq{}
-	if r.Intn(10) != 0 {
-		v1 := string(randStringBase(r))
-		this.Rpc = &v1
-	}
-	if r.Intn(10) != 0 {
-		v2 := string(randStringBase(r))
-		this.Body = &v2
-	}
-	if r.Intn(10) != 0 {
-		v3 := string(randStringBase(r))
-		this.Ext = &v3
-	}
+	this.Rpc = string(randStringBase(r))
+	this.Body = string(randStringBase(r))
+	this.Ext = string(randStringBase(r))
 	if !easy && r.Intn(10) != 0 {
 		this.XXX_unrecognized = randUnrecognizedBase(r, 4)
 	}
@@ -565,24 +535,12 @@ func NewPopulatedRpcReq(r randyBase, easy bool) *RpcReq {
 
 func NewPopulatedRpcResp(r randyBase, easy bool) *RpcResp {
 	this := &RpcResp{}
-	if r.Intn(10) != 0 {
-		v4 := string(randStringBase(r))
-		this.Rpc = &v4
-	}
-	if r.Intn(10) != 0 {
-		v5 := string(randStringBase(r))
-		this.Body = &v5
-	}
-	if r.Intn(10) != 0 {
-		v6 := string(randStringBase(r))
-		this.Ext = &v6
-	}
-	if r.Intn(10) != 0 {
-		v7 := int32(r.Int31())
-		if r.Intn(2) == 0 {
-			v7 *= -1
-		}
-		this.Code = &v7
+	this.Rpc = string(randStringBase(r))
+	this.Body = string(randStringBase(r))
+	this.Ext = string(randStringBase(r))
+	this.Code = int32(r.Int31())
+	if r.Intn(2) == 0 {
+		this.Code *= -1
 	}
 	if !easy && r.Intn(10) != 0 {
 		this.XXX_unrecognized = randUnrecognizedBase(r, 5)
@@ -609,9 +567,9 @@ func randUTF8RuneBase(r randyBase) rune {
 	return rune(ru + 61)
 }
 func randStringBase(r randyBase) string {
-	v8 := r.Intn(100)
-	tmps := make([]rune, v8)
-	for i := 0; i < v8; i++ {
+	v1 := r.Intn(100)
+	tmps := make([]rune, v1)
+	for i := 0; i < v1; i++ {
 		tmps[i] = randUTF8RuneBase(r)
 	}
 	return string(tmps)
@@ -633,11 +591,11 @@ func randFieldBase(dAtA []byte, r randyBase, fieldNumber int, wire int) []byte {
 	switch wire {
 	case 0:
 		dAtA = encodeVarintPopulateBase(dAtA, uint64(key))
-		v9 := r.Int63()
+		v2 := r.Int63()
 		if r.Intn(2) == 0 {
-			v9 *= -1
+			v2 *= -1
 		}
-		dAtA = encodeVarintPopulateBase(dAtA, uint64(v9))
+		dAtA = encodeVarintPopulateBase(dAtA, uint64(v2))
 	case 1:
 		dAtA = encodeVarintPopulateBase(dAtA, uint64(key))
 		dAtA = append(dAtA, byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)))
@@ -668,18 +626,12 @@ func (m *RpcReq) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.Rpc != nil {
-		l = len(*m.Rpc)
-		n += 1 + l + sovBase(uint64(l))
-	}
-	if m.Body != nil {
-		l = len(*m.Body)
-		n += 1 + l + sovBase(uint64(l))
-	}
-	if m.Ext != nil {
-		l = len(*m.Ext)
-		n += 1 + l + sovBase(uint64(l))
-	}
+	l = len(m.Rpc)
+	n += 1 + l + sovBase(uint64(l))
+	l = len(m.Body)
+	n += 1 + l + sovBase(uint64(l))
+	l = len(m.Ext)
+	n += 1 + l + sovBase(uint64(l))
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
 	}
@@ -692,21 +644,13 @@ func (m *RpcResp) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.Rpc != nil {
-		l = len(*m.Rpc)
-		n += 1 + l + sovBase(uint64(l))
-	}
-	if m.Body != nil {
-		l = len(*m.Body)
-		n += 1 + l + sovBase(uint64(l))
-	}
-	if m.Ext != nil {
-		l = len(*m.Ext)
-		n += 1 + l + sovBase(uint64(l))
-	}
-	if m.Code != nil {
-		n += 1 + sovBase(uint64(*m.Code))
-	}
+	l = len(m.Rpc)
+	n += 1 + l + sovBase(uint64(l))
+	l = len(m.Body)
+	n += 1 + l + sovBase(uint64(l))
+	l = len(m.Ext)
+	n += 1 + l + sovBase(uint64(l))
+	n += 1 + sovBase(uint64(m.Code))
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
 	}
@@ -714,14 +658,7 @@ func (m *RpcResp) Size() (n int) {
 }
 
 func sovBase(x uint64) (n int) {
-	for {
-		n++
-		x >>= 7
-		if x == 0 {
-			break
-		}
-	}
-	return n
+	return (math_bits.Len64(x|1) + 6) / 7
 }
 func sozBase(x uint64) (n int) {
 	return sovBase(uint64((x << 1) ^ uint64((int64(x) >> 63))))
@@ -731,9 +668,9 @@ func (this *RpcReq) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&RpcReq{`,
-		`Rpc:` + valueToStringBase(this.Rpc) + `,`,
-		`Body:` + valueToStringBase(this.Body) + `,`,
-		`Ext:` + valueToStringBase(this.Ext) + `,`,
+		`Rpc:` + fmt.Sprintf("%v", this.Rpc) + `,`,
+		`Body:` + fmt.Sprintf("%v", this.Body) + `,`,
+		`Ext:` + fmt.Sprintf("%v", this.Ext) + `,`,
 		`XXX_unrecognized:` + fmt.Sprintf("%v", this.XXX_unrecognized) + `,`,
 		`}`,
 	}, "")
@@ -744,10 +681,10 @@ func (this *RpcResp) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&RpcResp{`,
-		`Rpc:` + valueToStringBase(this.Rpc) + `,`,
-		`Body:` + valueToStringBase(this.Body) + `,`,
-		`Ext:` + valueToStringBase(this.Ext) + `,`,
-		`Code:` + valueToStringBase(this.Code) + `,`,
+		`Rpc:` + fmt.Sprintf("%v", this.Rpc) + `,`,
+		`Body:` + fmt.Sprintf("%v", this.Body) + `,`,
+		`Ext:` + fmt.Sprintf("%v", this.Ext) + `,`,
+		`Code:` + fmt.Sprintf("%v", this.Code) + `,`,
 		`XXX_unrecognized:` + fmt.Sprintf("%v", this.XXX_unrecognized) + `,`,
 		`}`,
 	}, "")
@@ -776,7 +713,7 @@ func (m *RpcReq) Unmarshal(dAtA []byte) error {
 			}
 			b := dAtA[iNdEx]
 			iNdEx++
-			wire |= (uint64(b) & 0x7F) << shift
+			wire |= uint64(b&0x7F) << shift
 			if b < 0x80 {
 				break
 			}
@@ -804,7 +741,7 @@ func (m *RpcReq) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -814,11 +751,13 @@ func (m *RpcReq) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthBase
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthBase
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			s := string(dAtA[iNdEx:postIndex])
-			m.Rpc = &s
+			m.Rpc = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -834,7 +773,7 @@ func (m *RpcReq) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -844,11 +783,13 @@ func (m *RpcReq) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthBase
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthBase
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			s := string(dAtA[iNdEx:postIndex])
-			m.Body = &s
+			m.Body = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
@@ -864,7 +805,7 @@ func (m *RpcReq) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -874,11 +815,13 @@ func (m *RpcReq) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthBase
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthBase
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			s := string(dAtA[iNdEx:postIndex])
-			m.Ext = &s
+			m.Ext = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -887,6 +830,9 @@ func (m *RpcReq) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			if skippy < 0 {
+				return ErrInvalidLengthBase
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthBase
 			}
 			if (iNdEx + skippy) > l {
@@ -917,7 +863,7 @@ func (m *RpcResp) Unmarshal(dAtA []byte) error {
 			}
 			b := dAtA[iNdEx]
 			iNdEx++
-			wire |= (uint64(b) & 0x7F) << shift
+			wire |= uint64(b&0x7F) << shift
 			if b < 0x80 {
 				break
 			}
@@ -945,7 +891,7 @@ func (m *RpcResp) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -955,11 +901,13 @@ func (m *RpcResp) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthBase
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthBase
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			s := string(dAtA[iNdEx:postIndex])
-			m.Rpc = &s
+			m.Rpc = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -975,7 +923,7 @@ func (m *RpcResp) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -985,11 +933,13 @@ func (m *RpcResp) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthBase
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthBase
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			s := string(dAtA[iNdEx:postIndex])
-			m.Body = &s
+			m.Body = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
@@ -1005,7 +955,7 @@ func (m *RpcResp) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= (uint64(b) & 0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1015,17 +965,19 @@ func (m *RpcResp) Unmarshal(dAtA []byte) error {
 				return ErrInvalidLengthBase
 			}
 			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthBase
+			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			s := string(dAtA[iNdEx:postIndex])
-			m.Ext = &s
+			m.Ext = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 4:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Code", wireType)
 			}
-			var v int32
+			m.Code = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowBase
@@ -1035,12 +987,11 @@ func (m *RpcResp) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= (int32(b) & 0x7F) << shift
+				m.Code |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			m.Code = &v
 		default:
 			iNdEx = preIndex
 			skippy, err := skipBase(dAtA[iNdEx:])
@@ -1048,6 +999,9 @@ func (m *RpcResp) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			if skippy < 0 {
+				return ErrInvalidLengthBase
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthBase
 			}
 			if (iNdEx + skippy) > l {
@@ -1117,8 +1071,11 @@ func skipBase(dAtA []byte) (n int, err error) {
 					break
 				}
 			}
-			iNdEx += length
 			if length < 0 {
+				return 0, ErrInvalidLengthBase
+			}
+			iNdEx += length
+			if iNdEx < 0 {
 				return 0, ErrInvalidLengthBase
 			}
 			return iNdEx, nil
@@ -1149,6 +1106,9 @@ func skipBase(dAtA []byte) (n int, err error) {
 					return 0, err
 				}
 				iNdEx = start + next
+				if iNdEx < 0 {
+					return 0, ErrInvalidLengthBase
+				}
 			}
 			return iNdEx, nil
 		case 4:
@@ -1167,23 +1127,3 @@ var (
 	ErrInvalidLengthBase = fmt.Errorf("proto: negative length found during unmarshaling")
 	ErrIntOverflowBase   = fmt.Errorf("proto: integer overflow")
 )
-
-func init() { proto.RegisterFile("base/base.proto", fileDescriptor_base_6a099303bf16be58) }
-
-var fileDescriptor_base_6a099303bf16be58 = []byte{
-	// 209 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4f, 0x4a, 0x2c, 0x4e,
-	0xd5, 0x07, 0x11, 0x7a, 0x05, 0x45, 0xf9, 0x25, 0xf9, 0x42, 0x6c, 0x05, 0x49, 0x4e, 0x89, 0xc5,
-	0xa9, 0x52, 0x26, 0x65, 0xa9, 0x79, 0x29, 0xf9, 0x45, 0xfa, 0xe9, 0x99, 0x25, 0x19, 0xa5, 0x49,
-	0x7a, 0xc9, 0xf9, 0xb9, 0xfa, 0xe9, 0xf9, 0xe9, 0xf9, 0xfa, 0x60, 0x55, 0x49, 0xa5, 0x69, 0x60,
-	0x1e, 0x98, 0x03, 0x66, 0x41, 0x74, 0x2b, 0x39, 0x70, 0xb1, 0x05, 0x15, 0x24, 0x07, 0xa5, 0x16,
-	0x0a, 0x09, 0x70, 0x31, 0x17, 0x15, 0x24, 0x4b, 0x30, 0x2a, 0x30, 0x6a, 0x70, 0x06, 0x81, 0x98,
-	0x42, 0x42, 0x5c, 0x2c, 0x49, 0xf9, 0x29, 0x95, 0x12, 0x4c, 0x60, 0x21, 0x30, 0x1b, 0xa4, 0x2a,
-	0xb5, 0xa2, 0x44, 0x82, 0x19, 0xa2, 0x2a, 0xb5, 0xa2, 0x44, 0x29, 0x94, 0x8b, 0x1d, 0x6c, 0x42,
-	0x71, 0x01, 0xb9, 0x46, 0x80, 0x54, 0x25, 0xe7, 0xa7, 0xa4, 0x4a, 0xb0, 0x28, 0x30, 0x6a, 0xb0,
-	0x06, 0x81, 0xd9, 0x4e, 0x3a, 0x37, 0x1e, 0xca, 0x31, 0x3c, 0x78, 0x28, 0xc7, 0xf8, 0xe1, 0xa1,
-	0x1c, 0xe3, 0x8f, 0x87, 0x72, 0x8c, 0x0d, 0x8f, 0xe4, 0x18, 0x57, 0x3c, 0x92, 0x63, 0xdc, 0xf1,
-	0x48, 0x8e, 0xf1, 0xc0, 0x23, 0x39, 0xc6, 0x13, 0x8f, 0xe4, 0x18, 0x2f, 0x3c, 0x92, 0x63, 0x7c,
-	0xf0, 0x48, 0x8e, 0x11, 0x10, 0x00, 0x00, 0xff, 0xff, 0x56, 0x43, 0xdc, 0x82, 0x16, 0x01, 0x00,
-	0x00,
-}

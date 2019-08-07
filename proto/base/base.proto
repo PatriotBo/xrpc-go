@@ -18,16 +18,22 @@ option (gogoproto.unmarshaler_all) = true;
 
 // socket请求包数据结构
 message RpcReq {
-    optional string rpc  = 1; // 服务名称
-    optional string body = 2; // 请求包体
-    optional string ext  = 3; // 扩展字段
+    optional string rpc  = 1[(gogoproto.nullable) = false]; // 服务名称
+    optional string body = 2[(gogoproto.nullable) = false]; // 请求包体
+    optional string ext  = 3[(gogoproto.nullable) = false]; // 扩展字段
 }
 
 // socket返回数据结构
 message RpcResp {
-    optional string rpc  = 1; // 服务名称
-    optional string body = 2; // 包体
-    optional string ext  = 3; // 扩展字段
-    optional int32  code = 4; // 返回码
+    optional string rpc  = 1[(gogoproto.nullable) = false]; // 服务名称
+    optional string body = 2[(gogoproto.nullable) = false]; // 包体
+    optional string ext  = 3[(gogoproto.nullable) = false]; // 扩展字段
+    optional int32  code = 4[(gogoproto.nullable) = false]; // 返回码
 }
 
+enum RpcCode{
+    SUCCESS   = 0; // 成功
+    TIMEOUT   = 1; // 处理超时
+    ERR       = 2; // 内部错误
+    NOT_FOUND = 3; // 找不到服务
+}

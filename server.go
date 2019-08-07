@@ -17,7 +17,7 @@ type protoI interface {
 	Unmarshal([]byte) error
 }
 
-type methodHandler func(svr interface{}, ctx context.Context, req interface{},body []byte)(protoI, error)
+type methodHandler func(svr interface{}, ctx context.Context, body []byte) (protoI, error)
 
 type MethodDesc struct {
 	MethodName string
@@ -37,8 +37,8 @@ type service struct {
 }
 
 type server struct {
-	ServiceMap sync.Map // 一个server可提供多个服务 map[string]*service
-	serve      bool     // 服务是否开启
+	ServiceMap sync.Map          // 一个server可提供多个服务 map[string]*service
+	serve      bool              // 服务是否开启
 	conns      map[net.Conn]bool // 管理该server上的所有连接，stop时主动关闭所有连接
 	sIp        string
 	sPort      int
@@ -46,7 +46,7 @@ type server struct {
 
 func NewServer(ip string, port int) *server {
 	return &server{
-		sIp:ip,
+		sIp:   ip,
 		sPort: port,
 		conns: make(map[net.Conn]bool),
 	}
@@ -83,18 +83,18 @@ func (s *server) register(sd *ServiceDesc, ss interface{}) {
 }
 
 // 启动服务
-func (s *server)Serve()error{
-	addr := fmt.Sprintf("%s:%d",s.sIp, s.sPort)
-	listener, err := net.Listen("tcp",addr)
+func (s *server) Serve() error {
+	addr := fmt.Sprintf("%s:%d", s.sIp, s.sPort)
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		fmt.Println("net.Listen failed: ",err)
+		fmt.Println("net.Listen failed: ", err)
 		return err
 	}
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println("conn accept failed: ",err)
+			fmt.Println("conn accept failed: ", err)
 			continue
 		}
 		s.conns[conn] = true
@@ -103,8 +103,8 @@ func (s *server)Serve()error{
 	}
 }
 
-func (s *server)handleConn(c net.Conn){
-	fmt.Println("conn established from remote addr: ",c.RemoteAddr().String())
+func (s *server) handleConn(c net.Conn) {
+	fmt.Println("conn established from remote addr: ", c.RemoteAddr().String())
 	for {
 		_, body, err := readRequest(c)
 		if err != nil {
@@ -118,11 +118,11 @@ func (s *server)handleConn(c net.Conn){
 }
 
 // 解析请求数据包
-func readRequest(c net.Conn)(header *RpcHead,body []byte,err error){
-	hb := make([]byte,RPC_HEAD_SIZE)
-	_, err = io.ReadFull(c,hb)
+func readRequest(c net.Conn) (header *RpcHead, body []byte, err error) {
+	hb := make([]byte, RPC_HEAD_SIZE)
+	_, err = io.ReadFull(c, hb)
 	if err != nil {
-		fmt.Println("read head failed: ",err)
+		fmt.Println("read head failed: ", err)
 		return
 	}
 
@@ -131,19 +131,19 @@ func readRequest(c net.Conn)(header *RpcHead,body []byte,err error){
 		return
 	}
 
-	body = make([]byte,header.Len)
-	_, err = io.ReadFull(c,body)
+	body = make([]byte, header.Len)
+	_, err = io.ReadFull(c, body)
 	if err != nil {
-		fmt.Println("read body failed:",err)
+		fmt.Println("read body failed:", err)
 		return
 	}
 	return
 }
 
-func (s *server)handleRequest(c net.Conn,body []byte){
+func (s *server) handleRequest(c net.Conn, body []byte) {
 	rpcReq := new(pbBase.RpcReq)
 	if err := rpcReq.Unmarshal(body); err != nil {
-		fmt.Println("unmarshal socket body failed:",err)
+		fmt.Println("unmarshal socket body failed:", err)
 		return
 	}
 
@@ -152,30 +152,46 @@ func (s *server)handleRequest(c net.Conn,body []byte){
 	if err != nil {
 		return
 	}
-	if srv, ok := s.ServiceMap.Load(sn);ok {
-		if method,ok := srv.(service).methods[mn]; ok {
+	if srv, ok := s.ServiceMap.Load(sn); ok {
+		if method, ok := srv.(service).methods[mn]; ok {
 
-			resp, err := method.Handler(srv.(service).server,context.TODO(),rpcReq,[]byte(rpcReq.GetBody()))
+			resp, err := method.Handler(srv.(service).server, context.TODO(), []byte(rpcReq.GetBody()))
 			if err != nil {
-
+				writeResponse(c, svrName, []byte(err.Error()), pbBase.RpcCode_ERR)
+				return
 			}
-			body,err := resp.Marshal()
-
+			body, err := resp.Marshal() // 业务返回的包体
+			writeResponse(c, svrName, body, pbBase.RpcCode_SUCCESS)
 		}
-		fmt.Printf("method %s not found in service %s\n",mn,sn)
+		fmt.Printf("method %s not found in service %s\n", mn, sn)
 		return
 	}
 
 }
 
-func checkServiceName(name string)(sn,mn string,err error){
-	full := strings.Split(name,".")
+func checkServiceName(name string) (sn, mn string, err error) {
+	full := strings.Split(name, ".")
 	if len(full) != 2 {
-		fmt.Println("bad service name: ",name)
-		err = errors.New(fmt.Sprintf("bad service name %s",name))
+		fmt.Println("bad service name: ", name)
+		err = errors.New(fmt.Sprintf("bad service name %s", name))
 		return
 	}
 	sn = full[0]
 	mn = full[1]
 	return
+}
+
+//
+func writeResponse(c net.Conn, sname string, body []byte, code pbBase.RpcCode) {
+	rpcResp := new(pbBase.RpcResp)
+	rpcResp.Body = string(body)
+	rpcResp.Rpc = sname
+	rpcResp.Code = int32(code)
+
+	dAtA, err := rpcResp.Marshal()
+	if err != nil {
+		fmt.Println("rpcResp.Marshal failed while write response for service ", sname)
+		//TODO:
+	}
+	c.Write(dAtA)
 }

@@ -8,13 +8,18 @@ import (
 )
 
 type AuthServer interface {
-	Get(ctx context.Context, req auth.AuthReq) (*auth.AuthResp,error)
+	Get(ctx context.Context, req auth.AuthReq) (*auth.AuthResp, error)
 }
 
-func _Get_Handler(svr interface{}, ctx context.Context, req interface{},body []byte)(protoI, error) {
+func _Get_Handler(svr interface{}, ctx context.Context, body []byte) (protoI, error) {
 	fmt.Println("_Get_Handler")
-	req.(protoI).Unmarshal(body)
-	return svr.(AuthServer).Get(ctx, req.(auth.AuthReq))
+	aReq := new(auth.AuthReq)
+	err := aReq.Unmarshal(body)
+	if err != nil {
+		fmt.Println("auth.AuthReq unmarshal failed:", err)
+		return nil, err
+	}
+	return svr.(AuthServer).Get(ctx, *aReq)
 }
 
 type Auth struct {
@@ -22,7 +27,7 @@ type Auth struct {
 
 var mAuth = &Auth{}
 
-func (a *Auth) Get(ctx context.Context, req auth.AuthReq)(*auth.AuthResp, error) {
+func (a *Auth) Get(ctx context.Context, req auth.AuthReq) (*auth.AuthResp, error) {
 	uid := req.GetUid()
 	name := req.GetName()
 	resp := new(auth.AuthResp)
@@ -44,13 +49,14 @@ func TestRegister(t *testing.T) {
 	}
 	server.RegisterService(sd, mAuth)
 
-	if s, ok := server.ServiceMap.Load("api-auth"); ok {
-		fmt.Println("-------------------")
-		req := new(auth.AuthReq)
-		//s.(service).methods["Get"].Handler()
-		resp, err := s.(AuthServer).Get(context.TODO(), *req)
-		if err != nil {
-			fmt.Println("call service api-auth.Get failed: ", err,resp)
-		}
-	}
+	server.Serve()
+	//if s, ok := server.ServiceMap.Load("api-auth"); ok {
+	//	fmt.Println("-------------------")
+	//	req := new(auth.AuthReq)
+	//	//s.(service).methods["Get"].Handler()
+	//	resp, err := s.(AuthServer).Get(context.TODO(), *req)
+	//	if err != nil {
+	//		fmt.Println("call service api-auth.Get failed: ", err, resp)
+	//	}
+	//}
 }
