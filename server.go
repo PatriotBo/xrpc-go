@@ -44,6 +44,22 @@ type server struct {
 	sPort      int
 }
 
+type Request struct {
+	len int
+	body []byte
+}
+
+type Response struct {
+	len int
+	body []byte
+}
+
+type connManager struct {
+	conn net.Conn
+	chanReq chan Request
+	chanResp chan Response
+}
+
 func NewServer(ip string, port int) *server {
 	return &server{
 		sIp:   ip,
@@ -99,21 +115,31 @@ func (s *server) Serve() error {
 		}
 		s.conns[conn] = true
 		// 处理连接
-		go s.handleConn(conn)
+		cm := &connManager{
+			conn: conn,
+			chanResp: make(chan Response),
+			chanReq: make(chan Request),
+		}
+		go s.handleConn(cm)
 	}
 }
 
-func (s *server) handleConn(c net.Conn) {
-	fmt.Println("conn established from remote addr: ", c.RemoteAddr().String())
+func (s *server) handleConn(cm *connManager) {
+	fmt.Println("conn established from remote addr: ", cm.conn.RemoteAddr().String())
 	for {
-		_, body, err := readRequest(c)
+		_, body, err := readRequest(cm.conn)
 		if err != nil {
 			fmt.Println("readRequest failed:")
 			continue
 		}
-
+		req := Request{
+			len: len(body),
+			body:body,
+		}
+		cm.chanReq <- req
 		// 开启goroutine 处理请求
-		go s.handleRequest(c, body)
+		go s.handleRequest(cm)
+		go s.handleResp(cm)
 	}
 }
 
@@ -140,7 +166,21 @@ func readRequest(c net.Conn) (header *RpcHead, body []byte, err error) {
 	return
 }
 
-func (s *server) handleRequest(c net.Conn, body []byte) {
+// 从chanResp通道中取出响应数据 写入连接
+func (s *server)handleResp(cm *connManager){
+	for resp := range cm.chanResp {
+		cm.conn.Write(resp.body)
+	}
+}
+
+// 从chanReq通道中取出请求数据， 进行处理，处理完成后添加到chanResp通道
+func (s *server)handleRequest(cm *connManager) {
+	for req := range cm.chanReq {
+		s.serveRequest(cm,req.body)
+	}
+}
+
+func (s *server) serveRequest(cm *connManager, body []byte) {
 	rpcReq := new(pbBase.RpcReq)
 	if err := rpcReq.Unmarshal(body); err != nil {
 		fmt.Println("unmarshal socket body failed:", err)
@@ -157,16 +197,16 @@ func (s *server) handleRequest(c net.Conn, body []byte) {
 
 			resp, err := method.Handler(srv.(service).server, context.TODO(), []byte(rpcReq.GetBody()))
 			if err != nil {
-				writeResponse(c, svrName, []byte(err.Error()), pbBase.RpcCode_ERR)
+				cm.writeResponse(svrName, []byte(err.Error()), pbBase.RpcCode_ERR)
 				return
 			}
 			body, err := resp.Marshal() // 业务返回的包体
-			writeResponse(c, svrName, body, pbBase.RpcCode_SUCCESS)
+			cm.writeResponse(svrName, body, pbBase.RpcCode_SUCCESS)
+			return
 		}
 		fmt.Printf("method %s not found in service %s\n", mn, sn)
 		return
 	}
-
 }
 
 func checkServiceName(name string) (sn, mn string, err error) {
@@ -181,8 +221,7 @@ func checkServiceName(name string) (sn, mn string, err error) {
 	return
 }
 
-//
-func writeResponse(c net.Conn, sname string, body []byte, code pbBase.RpcCode) {
+func (cm *connManager)writeResponse(sname string, body []byte, code pbBase.RpcCode) {
 	rpcResp := new(pbBase.RpcResp)
 	rpcResp.Body = string(body)
 	rpcResp.Rpc = sname
@@ -193,5 +232,6 @@ func writeResponse(c net.Conn, sname string, body []byte, code pbBase.RpcCode) {
 		fmt.Println("rpcResp.Marshal failed while write response for service ", sname)
 		//TODO:
 	}
-	c.Write(dAtA)
+
+	cm.chanResp <- Response{len:len(dAtA),body:dAtA}
 }
