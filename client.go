@@ -31,13 +31,11 @@ type request struct {
 	Sname     string // 服务名
 	Head      RpcHead
 	Body      []byte
-	ReplyChan chan interface{}
+	ReplyChan chan response
 }
 
 type response struct {
-	Seq  int
-	Sname string
-	Body []byte
+	pbBase.RpcResp
 }
 
 /*
@@ -60,7 +58,7 @@ func NewClient() *Client {
 	}
 }
 
-func (c *Client) Call(ctx context.Context, sname string, req protoI, resp *protoI) error {
+func (c *Client) Call(ctx context.Context, sname string, req, resp protoI) error {
 	//todo: 根据服务发现机制，由服务名找到服务所在ip,port
 	addr, err := findServer(sname)
 	if err != nil {
@@ -84,7 +82,11 @@ func (c *Client) Call(ctx context.Context, sname string, req protoI, resp *proto
 			Seq:       cc.count,
 			Sname: sname,
 			Body: body,
-			ReplyChan: make(chan interface{}),
+			ReplyChan: make(chan response),
+		}
+		if _, ok := cc.reqMap.LoadOrStore(reqData.Seq,reqData); ok {
+			fmt.Printf("reqMap sotre failed request = %v exists! \n",reqData)
+			return errors.New("request exists")
 		}
 		cc.chanReq <- *reqData
 		c.mu.Unlock()
@@ -109,8 +111,14 @@ func (c *Client) Call(ctx context.Context, sname string, req protoI, resp *proto
 			Seq:       clientConn.count,
 			Sname: sname,
 			Body: body,
-			ReplyChan: make(chan interface{}),
+			ReplyChan: make(chan response),
 		}
+
+		if _, ok := cc.reqMap.LoadOrStore(reqData.Seq,reqData); ok {
+			fmt.Printf("new conn reqMap sotre failed request = %v exists! \n",reqData)
+			return errors.New("request exists")
+		}
+
 		clientConn.chanReq <- *reqData
 	}
 
@@ -120,7 +128,15 @@ func (c *Client) Call(ctx context.Context, sname string, req protoI, resp *proto
 			fmt.Println("request timeout")
 			return errors.New("timeout")
 		case respBody := <- reqData.ReplyChan:
-
+			if respBody.Rpc != sname {
+				fmt.Printf("wrong response from [%s] for request service [%s]\n",respBody.Rpc,sname)
+				return errors.New("wrong response")
+			}
+			err = resp.Unmarshal([]byte(respBody.Body))
+			if err != nil {
+				fmt.Printf("unmarshal resp failed for request service[%s]: %v\n",sname,err)
+				return errors.New("unmarshal resp failed")
+			}
 	}
 	return nil
 }
@@ -149,7 +165,45 @@ func (c *Client) Connect(addr string) (*ClientConn,error) {
 
 	// 开启守护线程 处理该连接上的请求和响应
 	go cc.sendRequest()
+	go cc.recvResponse()
 	return cc, nil
+}
+
+// 从连接中读取响应数据
+func (cc *ClientConn)recvResponse(){
+	for {
+		// 首先读取4byte的长度信息
+		var blen int32 // 头部指示的包体长度
+		err := binary.Read(cc.conn,binary.BigEndian,&blen)
+		if err != nil {
+			fmt.Printf("recvResponse read header failed: blen = %d, err = %v\n",blen,err)
+			continue
+		}
+		// 然后从连接中读取响应长度的数据
+		var body = make([]byte,blen)
+		rlen, err := cc.conn.Read(body) // rlen 实际读出的长度
+		if rlen != int(blen) || err != nil {
+			fmt.Printf("recvResponse read body failed: rlen = %d blen = %d, err = %v",rlen,blen,err)
+			continue
+		}
+
+		resp := new(pbBase.RpcResp)
+		err = resp.Unmarshal(body)
+		if err != nil {
+			fmt.Println("recvResponse unmarshal resp failed:",err)
+			continue
+		}
+		if resp.Code != 0 {
+			fmt.Printf("rpc call service[%s] failed return code[%d] \n",resp.Rpc,resp.Code)
+		}
+		if req, ok := cc.reqMap.Load(resp.Seq); ok {
+			rp := response{*resp}
+			req.(request).ReplyChan <- rp
+			// 从请求map中删除该请求
+			cc.reqMap.Delete(resp.Seq)
+			cc.count--
+		}
+	}
 }
 
 // 处理连接上的请求： 接收通道中的数据，写入连接
@@ -194,3 +248,7 @@ func (cc *ClientConn) sendRequest() {
 		}
 	}
 }
+
+//todo: 重连
+
+// todo: 心跳检测

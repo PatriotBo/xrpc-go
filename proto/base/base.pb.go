@@ -76,7 +76,8 @@ func (RpcCode) EnumDescriptor() ([]byte, []int) {
 type RpcReq struct {
 	Rpc                  string   `protobuf:"bytes,1,opt,name=rpc" json:"rpc"`
 	Body                 string   `protobuf:"bytes,2,opt,name=body" json:"body"`
-	Ext                  string   `protobuf:"bytes,3,opt,name=ext" json:"ext"`
+	Seq                  int32    `protobuf:"varint,3,opt,name=seq" json:"seq"`
+	Ext                  string   `protobuf:"bytes,4,opt,name=ext" json:"ext"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -128,6 +129,13 @@ func (m *RpcReq) GetBody() string {
 	return ""
 }
 
+func (m *RpcReq) GetSeq() int32 {
+	if m != nil {
+		return m.Seq
+	}
+	return 0
+}
+
 func (m *RpcReq) GetExt() string {
 	if m != nil {
 		return m.Ext
@@ -139,8 +147,9 @@ func (m *RpcReq) GetExt() string {
 type RpcResp struct {
 	Rpc                  string   `protobuf:"bytes,1,opt,name=rpc" json:"rpc"`
 	Body                 string   `protobuf:"bytes,2,opt,name=body" json:"body"`
-	Ext                  string   `protobuf:"bytes,3,opt,name=ext" json:"ext"`
-	Code                 int32    `protobuf:"varint,4,opt,name=code" json:"code"`
+	Seq                  int32    `protobuf:"varint,3,opt,name=seq" json:"seq"`
+	Ext                  string   `protobuf:"bytes,4,opt,name=ext" json:"ext"`
+	Code                 int32    `protobuf:"varint,5,opt,name=code" json:"code"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -192,6 +201,13 @@ func (m *RpcResp) GetBody() string {
 	return ""
 }
 
+func (m *RpcResp) GetSeq() int32 {
+	if m != nil {
+		return m.Seq
+	}
+	return 0
+}
+
 func (m *RpcResp) GetExt() string {
 	if m != nil {
 		return m.Ext
@@ -215,24 +231,25 @@ func init() {
 func init() { proto.RegisterFile("base/base.proto", fileDescriptor_d66ec2e140567106) }
 
 var fileDescriptor_d66ec2e140567106 = []byte{
-	// 266 bytes of a gzipped FileDescriptorProto
+	// 278 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4f, 0x4a, 0x2c, 0x4e,
 	0xd5, 0x07, 0x11, 0x7a, 0x05, 0x45, 0xf9, 0x25, 0xf9, 0x42, 0x6c, 0x05, 0x49, 0x4e, 0x89, 0xc5,
 	0xa9, 0x52, 0xba, 0xe9, 0x99, 0x25, 0x19, 0xa5, 0x49, 0x7a, 0xc9, 0xf9, 0xb9, 0xfa, 0xe9, 0xf9,
 	0xe9, 0xf9, 0xfa, 0x60, 0xe9, 0xa4, 0xd2, 0x34, 0x30, 0x0f, 0xcc, 0x01, 0xb3, 0x20, 0xda, 0x94,
-	0x82, 0xb8, 0xd8, 0x82, 0x0a, 0x92, 0x83, 0x52, 0x0b, 0x85, 0xc4, 0xb8, 0x98, 0x8b, 0x0a, 0x92,
+	0xb2, 0xb8, 0xd8, 0x82, 0x0a, 0x92, 0x83, 0x52, 0x0b, 0x85, 0xc4, 0xb8, 0x98, 0x8b, 0x0a, 0x92,
 	0x25, 0x18, 0x15, 0x18, 0x35, 0x38, 0x9d, 0x58, 0x4e, 0xdc, 0x93, 0x67, 0x08, 0x02, 0x09, 0x08,
-	0x49, 0x70, 0xb1, 0x24, 0xe5, 0xa7, 0x54, 0x4a, 0x30, 0x21, 0x49, 0x80, 0x45, 0x40, 0x3a, 0x52,
-	0x2b, 0x4a, 0x24, 0x98, 0x91, 0x75, 0xa4, 0x56, 0x94, 0x28, 0xe5, 0x72, 0xb1, 0x83, 0xcd, 0x2c,
-	0x2e, 0xa0, 0x9e, 0xa1, 0x20, 0x1d, 0xc9, 0xf9, 0x29, 0xa9, 0x12, 0x2c, 0x0a, 0x8c, 0x1a, 0xac,
-	0x30, 0x1d, 0x20, 0x11, 0x2d, 0x6b, 0xb0, 0x75, 0xce, 0xf9, 0x29, 0xa9, 0x42, 0xdc, 0x5c, 0xec,
-	0xc1, 0xa1, 0xce, 0xce, 0xae, 0xc1, 0xc1, 0x02, 0x0c, 0x20, 0x4e, 0x88, 0xa7, 0xaf, 0xab, 0x7f,
-	0x68, 0x88, 0x00, 0xa3, 0x10, 0x3b, 0x17, 0xb3, 0x6b, 0x50, 0x90, 0x00, 0x93, 0x10, 0x2f, 0x17,
-	0xa7, 0x9f, 0x7f, 0x48, 0xbc, 0x9b, 0x7f, 0xa8, 0x9f, 0x8b, 0x00, 0xb3, 0x93, 0xce, 0x8d, 0x87,
-	0x72, 0x0c, 0x0f, 0x1e, 0xca, 0x31, 0x7e, 0x78, 0x28, 0xc7, 0xf8, 0xe3, 0xa1, 0x1c, 0x63, 0xc3,
-	0x23, 0x39, 0xc6, 0x15, 0x8f, 0xe4, 0x18, 0x77, 0x3c, 0x92, 0x63, 0x3c, 0xf0, 0x48, 0x8e, 0xf1,
-	0xc4, 0x23, 0x39, 0xc6, 0x0b, 0x8f, 0xe4, 0x18, 0x1f, 0x3c, 0x92, 0x63, 0x04, 0x04, 0x00, 0x00,
-	0xff, 0xff, 0xef, 0x37, 0x81, 0x87, 0x76, 0x01, 0x00, 0x00,
+	0x49, 0x70, 0xb1, 0x24, 0xe5, 0xa7, 0x54, 0x4a, 0x30, 0x21, 0x49, 0x80, 0x45, 0x40, 0x3a, 0x8a,
+	0x53, 0x0b, 0x25, 0x98, 0x15, 0x18, 0x35, 0x58, 0x61, 0x3a, 0x8a, 0x21, 0x26, 0xa5, 0x56, 0x94,
+	0x48, 0xb0, 0x20, 0x9b, 0x94, 0x5a, 0x51, 0xa2, 0xd4, 0xca, 0xc8, 0xc5, 0x0e, 0xb6, 0xac, 0xb8,
+	0x80, 0xf6, 0xb6, 0x81, 0x4c, 0x4a, 0xce, 0x4f, 0x49, 0x95, 0x60, 0x45, 0xd2, 0x00, 0x16, 0xd1,
+	0xb2, 0x06, 0x3b, 0xc3, 0x39, 0x3f, 0x25, 0x55, 0x88, 0x9b, 0x8b, 0x3d, 0x38, 0xd4, 0xd9, 0xd9,
+	0x35, 0x38, 0x58, 0x80, 0x01, 0xc4, 0x09, 0xf1, 0xf4, 0x75, 0xf5, 0x0f, 0x0d, 0x11, 0x60, 0x14,
+	0x62, 0xe7, 0x62, 0x76, 0x0d, 0x0a, 0x12, 0x60, 0x12, 0xe2, 0xe5, 0xe2, 0xf4, 0xf3, 0x0f, 0x89,
+	0x77, 0xf3, 0x0f, 0xf5, 0x73, 0x11, 0x60, 0x76, 0xd2, 0xb9, 0xf1, 0x50, 0x8e, 0xe1, 0xc1, 0x43,
+	0x39, 0xc6, 0x0f, 0x0f, 0xe5, 0x18, 0x7f, 0x3c, 0x94, 0x63, 0x6c, 0x78, 0x24, 0xc7, 0xb8, 0xe2,
+	0x91, 0x1c, 0xe3, 0x8e, 0x47, 0x72, 0x8c, 0x07, 0x1e, 0xc9, 0x31, 0x9e, 0x78, 0x24, 0xc7, 0x78,
+	0xe1, 0x91, 0x1c, 0xe3, 0x83, 0x47, 0x72, 0x8c, 0x80, 0x00, 0x00, 0x00, 0xff, 0xff, 0x13, 0x96,
+	0x12, 0x7a, 0xa7, 0x01, 0x00, 0x00,
 }
 
 func (this *RpcReq) VerboseEqual(that interface{}) error {
@@ -266,6 +283,9 @@ func (this *RpcReq) VerboseEqual(that interface{}) error {
 	if this.Body != that1.Body {
 		return fmt.Errorf("Body this(%v) Not Equal that(%v)", this.Body, that1.Body)
 	}
+	if this.Seq != that1.Seq {
+		return fmt.Errorf("Seq this(%v) Not Equal that(%v)", this.Seq, that1.Seq)
+	}
 	if this.Ext != that1.Ext {
 		return fmt.Errorf("Ext this(%v) Not Equal that(%v)", this.Ext, that1.Ext)
 	}
@@ -297,6 +317,9 @@ func (this *RpcReq) Equal(that interface{}) bool {
 		return false
 	}
 	if this.Body != that1.Body {
+		return false
+	}
+	if this.Seq != that1.Seq {
 		return false
 	}
 	if this.Ext != that1.Ext {
@@ -338,6 +361,9 @@ func (this *RpcResp) VerboseEqual(that interface{}) error {
 	if this.Body != that1.Body {
 		return fmt.Errorf("Body this(%v) Not Equal that(%v)", this.Body, that1.Body)
 	}
+	if this.Seq != that1.Seq {
+		return fmt.Errorf("Seq this(%v) Not Equal that(%v)", this.Seq, that1.Seq)
+	}
 	if this.Ext != that1.Ext {
 		return fmt.Errorf("Ext this(%v) Not Equal that(%v)", this.Ext, that1.Ext)
 	}
@@ -374,6 +400,9 @@ func (this *RpcResp) Equal(that interface{}) bool {
 	if this.Body != that1.Body {
 		return false
 	}
+	if this.Seq != that1.Seq {
+		return false
+	}
 	if this.Ext != that1.Ext {
 		return false
 	}
@@ -389,10 +418,11 @@ func (this *RpcReq) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 8)
 	s = append(s, "&pbBase.RpcReq{")
 	s = append(s, "Rpc: "+fmt.Sprintf("%#v", this.Rpc)+",\n")
 	s = append(s, "Body: "+fmt.Sprintf("%#v", this.Body)+",\n")
+	s = append(s, "Seq: "+fmt.Sprintf("%#v", this.Seq)+",\n")
 	s = append(s, "Ext: "+fmt.Sprintf("%#v", this.Ext)+",\n")
 	if this.XXX_unrecognized != nil {
 		s = append(s, "XXX_unrecognized:"+fmt.Sprintf("%#v", this.XXX_unrecognized)+",\n")
@@ -404,10 +434,11 @@ func (this *RpcResp) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 8)
+	s := make([]string, 0, 9)
 	s = append(s, "&pbBase.RpcResp{")
 	s = append(s, "Rpc: "+fmt.Sprintf("%#v", this.Rpc)+",\n")
 	s = append(s, "Body: "+fmt.Sprintf("%#v", this.Body)+",\n")
+	s = append(s, "Seq: "+fmt.Sprintf("%#v", this.Seq)+",\n")
 	s = append(s, "Ext: "+fmt.Sprintf("%#v", this.Ext)+",\n")
 	s = append(s, "Code: "+fmt.Sprintf("%#v", this.Code)+",\n")
 	if this.XXX_unrecognized != nil {
@@ -452,7 +483,10 @@ func (m *RpcReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	copy(dAtA[i:], m.Ext)
 	i = encodeVarintBase(dAtA, i, uint64(len(m.Ext)))
 	i--
-	dAtA[i] = 0x1a
+	dAtA[i] = 0x22
+	i = encodeVarintBase(dAtA, i, uint64(m.Seq))
+	i--
+	dAtA[i] = 0x18
 	i -= len(m.Body)
 	copy(dAtA[i:], m.Body)
 	i = encodeVarintBase(dAtA, i, uint64(len(m.Body)))
@@ -492,12 +526,15 @@ func (m *RpcResp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	i = encodeVarintBase(dAtA, i, uint64(m.Code))
 	i--
-	dAtA[i] = 0x20
+	dAtA[i] = 0x28
 	i -= len(m.Ext)
 	copy(dAtA[i:], m.Ext)
 	i = encodeVarintBase(dAtA, i, uint64(len(m.Ext)))
 	i--
-	dAtA[i] = 0x1a
+	dAtA[i] = 0x22
+	i = encodeVarintBase(dAtA, i, uint64(m.Seq))
+	i--
+	dAtA[i] = 0x18
 	i -= len(m.Body)
 	copy(dAtA[i:], m.Body)
 	i = encodeVarintBase(dAtA, i, uint64(len(m.Body)))
@@ -526,9 +563,13 @@ func NewPopulatedRpcReq(r randyBase, easy bool) *RpcReq {
 	this := &RpcReq{}
 	this.Rpc = string(randStringBase(r))
 	this.Body = string(randStringBase(r))
+	this.Seq = int32(r.Int31())
+	if r.Intn(2) == 0 {
+		this.Seq *= -1
+	}
 	this.Ext = string(randStringBase(r))
 	if !easy && r.Intn(10) != 0 {
-		this.XXX_unrecognized = randUnrecognizedBase(r, 4)
+		this.XXX_unrecognized = randUnrecognizedBase(r, 5)
 	}
 	return this
 }
@@ -537,13 +578,17 @@ func NewPopulatedRpcResp(r randyBase, easy bool) *RpcResp {
 	this := &RpcResp{}
 	this.Rpc = string(randStringBase(r))
 	this.Body = string(randStringBase(r))
+	this.Seq = int32(r.Int31())
+	if r.Intn(2) == 0 {
+		this.Seq *= -1
+	}
 	this.Ext = string(randStringBase(r))
 	this.Code = int32(r.Int31())
 	if r.Intn(2) == 0 {
 		this.Code *= -1
 	}
 	if !easy && r.Intn(10) != 0 {
-		this.XXX_unrecognized = randUnrecognizedBase(r, 5)
+		this.XXX_unrecognized = randUnrecognizedBase(r, 6)
 	}
 	return this
 }
@@ -630,6 +675,7 @@ func (m *RpcReq) Size() (n int) {
 	n += 1 + l + sovBase(uint64(l))
 	l = len(m.Body)
 	n += 1 + l + sovBase(uint64(l))
+	n += 1 + sovBase(uint64(m.Seq))
 	l = len(m.Ext)
 	n += 1 + l + sovBase(uint64(l))
 	if m.XXX_unrecognized != nil {
@@ -648,6 +694,7 @@ func (m *RpcResp) Size() (n int) {
 	n += 1 + l + sovBase(uint64(l))
 	l = len(m.Body)
 	n += 1 + l + sovBase(uint64(l))
+	n += 1 + sovBase(uint64(m.Seq))
 	l = len(m.Ext)
 	n += 1 + l + sovBase(uint64(l))
 	n += 1 + sovBase(uint64(m.Code))
@@ -670,6 +717,7 @@ func (this *RpcReq) String() string {
 	s := strings.Join([]string{`&RpcReq{`,
 		`Rpc:` + fmt.Sprintf("%v", this.Rpc) + `,`,
 		`Body:` + fmt.Sprintf("%v", this.Body) + `,`,
+		`Seq:` + fmt.Sprintf("%v", this.Seq) + `,`,
 		`Ext:` + fmt.Sprintf("%v", this.Ext) + `,`,
 		`XXX_unrecognized:` + fmt.Sprintf("%v", this.XXX_unrecognized) + `,`,
 		`}`,
@@ -683,6 +731,7 @@ func (this *RpcResp) String() string {
 	s := strings.Join([]string{`&RpcResp{`,
 		`Rpc:` + fmt.Sprintf("%v", this.Rpc) + `,`,
 		`Body:` + fmt.Sprintf("%v", this.Body) + `,`,
+		`Seq:` + fmt.Sprintf("%v", this.Seq) + `,`,
 		`Ext:` + fmt.Sprintf("%v", this.Ext) + `,`,
 		`Code:` + fmt.Sprintf("%v", this.Code) + `,`,
 		`XXX_unrecognized:` + fmt.Sprintf("%v", this.XXX_unrecognized) + `,`,
@@ -792,6 +841,25 @@ func (m *RpcReq) Unmarshal(dAtA []byte) error {
 			m.Body = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Seq", wireType)
+			}
+			m.Seq = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowBase
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Seq |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Ext", wireType)
 			}
@@ -942,6 +1010,25 @@ func (m *RpcResp) Unmarshal(dAtA []byte) error {
 			m.Body = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Seq", wireType)
+			}
+			m.Seq = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowBase
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Seq |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Ext", wireType)
 			}
@@ -973,7 +1060,7 @@ func (m *RpcResp) Unmarshal(dAtA []byte) error {
 			}
 			m.Ext = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 4:
+		case 5:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Code", wireType)
 			}

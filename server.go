@@ -1,7 +1,9 @@
 package xrpc
 
 import (
+	"bytes"
 	"context"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -169,7 +171,23 @@ func readRequest(c net.Conn) (header *RpcHead, body []byte, err error) {
 // 从chanResp通道中取出响应数据 写入连接
 func (s *server)handleResp(cm *connManager){
 	for resp := range cm.chanResp {
-		cm.conn.Write(resp.body)
+		dlen := int32(len(resp.body))
+		buf := new(bytes.Buffer)
+		err := binary.Write(buf,binary.BigEndian,dlen)
+		if err != nil {
+			fmt.Println("handleResp write body len failed:",err)
+			continue
+		}
+		err = binary.Write(buf,binary.BigEndian,resp.body)
+		if err != nil {
+			fmt.Println("handleResp write body failed:",err)
+			continue
+		}
+		wlen, err := cm.conn.Write(buf.Bytes())
+		if wlen < int(dlen) || err != nil {
+			fmt.Printf("write response into conn failed: wlen=%d, dlen=%d, err=%v\n",wlen,dlen,err)
+			continue
+		}
 	}
 }
 
