@@ -44,3 +44,15 @@ func ParseHead(buf []byte)(*RpcHead,error){
 }
 
 // 解析包体中的服务数据
+
+func NewRpcHead(ver, len uint16)RpcHead{
+	var flag [3]byte
+	flag[0] = uint8('R')
+	flag[1] = uint8('P')
+	flag[2] = uint8('C')
+	return RpcHead{
+		Flag: flag,
+		Ver: ver,
+		Len: len,
+	}
+}

@@ -20,15 +20,17 @@ option (gogoproto.unmarshaler_all) = true;
 message RpcReq {
     optional string rpc  = 1[(gogoproto.nullable) = false]; // 服务名称
     optional string body = 2[(gogoproto.nullable) = false]; // 请求包体
-    optional string ext  = 3[(gogoproto.nullable) = false]; // 扩展字段
+    optional int32  seq  = 3[(gogoproto.nullable) = false]; // 请求序列号
+    optional string ext  = 4[(gogoproto.nullable) = false]; // 扩展字段
 }
 
 // socket返回数据结构
 message RpcResp {
     optional string rpc  = 1[(gogoproto.nullable) = false]; // 服务名称
     optional string body = 2[(gogoproto.nullable) = false]; // 包体
-    optional string ext  = 3[(gogoproto.nullable) = false]; // 扩展字段
-    optional int32  code = 4[(gogoproto.nullable) = false]; // 返回码
+    optional int32  seq  = 3[(gogoproto.nullable) = false]; // 请求序列号
+    optional string ext  = 4[(gogoproto.nullable) = false]; // 扩展字段
+    optional int32  code = 5[(gogoproto.nullable) = false]; // 返回码
 }
 
 enum RpcCode{
