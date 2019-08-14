@@ -115,7 +115,6 @@ func (c *Client) Call(ctx context.Context, sname string, req protoI, resp *proto
 	}
 
 	timer := time.Tick(time.Second*RequestTimeout)
-
 	select {
 		case <- timer:
 			fmt.Println("request timeout")

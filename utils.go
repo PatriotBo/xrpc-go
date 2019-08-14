@@ -43,8 +43,9 @@ func ParseHead(buf []byte)(*RpcHead,error){
 	return &head,nil
 }
 
-// 解析包体中的服务数据
+// todo:解析包体中的服务数据
 
+// 创建rpc头部
 func NewRpcHead(ver, len uint16)RpcHead{
 	var flag [3]byte
 	flag[0] = uint8('R')
