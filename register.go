@@ -85,12 +85,12 @@ func (zr *ZKRtr) Register(info ServiceInfo) error {
 }
 
 // 从zk中获取服务信息
-func (zr *ZKRtr) GetServiceInfoByName(name string) (ServiceInfo, error) {
+func (zr *ZKRtr) GetServiceInfoByName(name string) (*ServiceInfo, error) {
 	if svrInfo, ok := zr.ServiceAll[name]; ok {
 		return svrInfo, nil
 	}
 
-	var ret ServiceInfo
+	var ret = new(ServiceInfo)
 	znodePath := rootPath + name
 	isExists, _, err := zr.conn.Exists(znodePath)
 	if err != nil {
