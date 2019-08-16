@@ -1,4 +1,4 @@
-package zkregister
+package xrpc
 
 import (
 	"encoding/json"
