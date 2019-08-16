@@ -159,19 +159,16 @@ func readRequest(c net.Conn) (header *RpcHead, body []byte, err error) {
 		fmt.Println("read head failed: ", err)
 		return
 	}
-	fmt.Println("readRequest ========== hb: ",hb)
 	header, err = ParseHead(hb)
 	if err != nil {
 		return
 	}
-	fmt.Println("readRequest ========== header:",header)
 	body = make([]byte, header.Len)
 	_, err = io.ReadFull(c, body)
 	if err != nil {
 		fmt.Println("read body failed:", err)
 		return
 	}
-	fmt.Println("readRequest ========== body:",string(body))
 	return
 }
 
@@ -191,7 +188,7 @@ func (s *server)handleResp(cm *connManager){
 			fmt.Println("handleResp write body failed:",err)
 			continue
 		}
-		fmt.Printf("handleResp ============= buf body:%+v \n",buf)
+		//fmt.Printf("handleResp ============= buf body:%+v \n",buf)
 		wlen, err := cm.conn.Write(buf.Bytes())
 		if wlen < int(dlen) || err != nil {
 			fmt.Printf("write response into conn failed: wlen=%d, dlen=%d, err=%v\n",wlen,dlen,err)
@@ -213,7 +210,7 @@ func (s *server) serveRequest(cm *connManager, body []byte) {
 		fmt.Println("unmarshal socket body failed:", err)
 		return
 	}
-	fmt.Printf("serveRequest ---------------- rpcReq= %+v \n",rpcReq)
+	//fmt.Printf("serveRequest ---------------- rpcReq= %+v \n",rpcReq)
 	svrName := rpcReq.GetRpc() // 获取服务名 api-auth.Get
 	sn, mn, err := checkServiceName(svrName)
 	if err != nil {
@@ -259,6 +256,6 @@ func (cm *connManager)writeResponse(sname string, body []byte, code pbBase.RpcCo
 		fmt.Println("rpcResp.Marshal failed while write response for service ", sname)
 		//TODO:
 	}
-	fmt.Printf("writeResponse for service %s with resp = %+v\n",sname,rpcResp)
+	//fmt.Printf("writeResponse for service %s with resp = %+v\n",sname,rpcResp)
 	cm.chanResp <- Response{len:len(dAtA),body:dAtA}
 }

@@ -30,13 +30,16 @@ func TestClient(t *testing.T) {
 		return
 	}
 	fmt.Printf("call success resp:%v\n",*resp)
+
 }
 
 func BenchmarkClient_Call(b *testing.B) {
+	b.StopTimer()
 	rpcClient := NewClient()
 	rpcClient.Connect("localhost:8090")
 	fmt.Println("benchmark time = ",b.N)
-	for i := 0;i < 1000; i++ {
+	b.StartTimer()
+	for i := 0;i < b.N; i++ {
 		sname := "api-hello.SayHello"
 		req := &pbHello.HelloReq{
 			Uid: 2304,
@@ -48,6 +51,6 @@ func BenchmarkClient_Call(b *testing.B) {
 			fmt.Println("call failed:",err)
 			return
 		}
-		fmt.Printf("call success resp:%v\n",*resp)
+		//fmt.Printf("call success resp:%v\n",*resp)
 	}
 }

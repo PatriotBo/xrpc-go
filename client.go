@@ -87,7 +87,7 @@ func (c *Client) Call(ctx context.Context, sname string, req, resp ProtoI) error
 			fmt.Printf("reqMap sotre failed request = %v exists! \n", reqData)
 			return errors.New("request exists")
 		}
-		fmt.Printf("connection exists call reqData:%+v \n",reqData)
+		//fmt.Printf("connection exists call reqData:%+v \n",reqData)
 		c.mu.Unlock()
 		cc.chanReq <- *reqData
 	} else { // 创建新连接
@@ -118,7 +118,7 @@ func (c *Client) Call(ctx context.Context, sname string, req, resp ProtoI) error
 			fmt.Printf("new conn reqMap sotre failed request = %v exists! \n", reqData)
 			return errors.New("request exists")
 		}
-		fmt.Println("new connection established  req: ",reqData)
+		//fmt.Println("new connection established  req: ",reqData)
 		clientConn.chanReq <- *reqData
 	}
 
@@ -128,7 +128,7 @@ func (c *Client) Call(ctx context.Context, sname string, req, resp ProtoI) error
 		fmt.Println("request timeout")
 		return errors.New("timeout")
 	case respBody := <-reqData.ReplyChan:
-		fmt.Println("select response back =-=-=-=-=-=-=-=-=-=-=",string(respBody.Body) )
+		//fmt.Println("select response back =-=-=-=-=-=-=-=-=-=-=",string(respBody.Body) )
 		if respBody.Rpc != sname {
 			fmt.Printf("wrong response from [%s] for request service [%s]\n", respBody.Rpc, sname)
 			return errors.New("wrong response")
@@ -197,17 +197,15 @@ func (cc *ClientConn) recvResponse() {
 			continue
 		}
 
-		fmt.Printf("recvResponse ============ resp: %+v\n",resp)
-
 		if resp.Code != 0 {
 			fmt.Printf("rpc call service[%s] failed return code[%d] \n", resp.Rpc, resp.Code)
 		}
-		if req, ok := cc.reqMap.Load(resp.Seq); ok {
-			fmt.Println("recvResponse ************ send resp to ReplyChan")
+
+		if req, ok := cc.reqMap.Load(int(resp.Seq)); ok {
 			rp := response{*resp}
-			req.(request).ReplyChan <- rp
+			req.(*request).ReplyChan <- rp
 			// 从请求map中删除该请求
-			cc.reqMap.Delete(resp.Seq)
+			cc.reqMap.Delete(int(resp.Seq))
 			cc.count--
 		}
 	}
@@ -251,7 +249,6 @@ func (cc *ClientConn) sendRequest() {
 			continue
 		}
 
-		fmt.Printf("sendRequest ================ write ,buf:%+v \n ",buf.String())
 		_, err = cc.conn.Write(buf.Bytes())
 		if err != nil {
 			fmt.Println("write req into conn failed:", err)
