@@ -14,12 +14,12 @@ import (
 	"xrpc-go/proto/base"
 )
 
-type protoI interface {
+type ProtoI interface {
 	Marshal() ([]byte, error)
 	Unmarshal([]byte) error
 }
 
-type methodHandler func(svr interface{}, ctx context.Context, body []byte) (protoI, error)
+type methodHandler func(svr interface{}, ctx context.Context, body []byte) (ProtoI, error)
 
 type MethodDesc struct {
 	MethodName string
@@ -91,6 +91,11 @@ func (s *server) register(sd *ServiceDesc, ss interface{}) {
 		methods: make(map[string]MethodDesc),
 	}
 
+	// 将服务提供的方法注册进去
+	for _, method := range sd.Methods {
+		srv.methods[method.MethodName] = method
+	}
+
 	if s.serve {
 		panic("found that register service while server is running")
 	}
@@ -138,10 +143,11 @@ func (s *server) handleConn(cm *connManager) {
 			len: len(body),
 			body:body,
 		}
-		cm.chanReq <- req
 		// 开启goroutine 处理请求
 		go s.handleRequest(cm)
 		go s.handleResp(cm)
+
+		cm.chanReq <- req
 	}
 }
 
@@ -153,18 +159,19 @@ func readRequest(c net.Conn) (header *RpcHead, body []byte, err error) {
 		fmt.Println("read head failed: ", err)
 		return
 	}
-
+	fmt.Println("readRequest ========== hb: ",hb)
 	header, err = ParseHead(hb)
 	if err != nil {
 		return
 	}
-
+	fmt.Println("readRequest ========== header:",header)
 	body = make([]byte, header.Len)
 	_, err = io.ReadFull(c, body)
 	if err != nil {
 		fmt.Println("read body failed:", err)
 		return
 	}
+	fmt.Println("readRequest ========== body:",string(body))
 	return
 }
 
@@ -178,11 +185,13 @@ func (s *server)handleResp(cm *connManager){
 			fmt.Println("handleResp write body len failed:",err)
 			continue
 		}
+
 		err = binary.Write(buf,binary.BigEndian,resp.body)
 		if err != nil {
 			fmt.Println("handleResp write body failed:",err)
 			continue
 		}
+		fmt.Printf("handleResp ============= buf body:%+v \n",buf)
 		wlen, err := cm.conn.Write(buf.Bytes())
 		if wlen < int(dlen) || err != nil {
 			fmt.Printf("write response into conn failed: wlen=%d, dlen=%d, err=%v\n",wlen,dlen,err)
@@ -204,22 +213,21 @@ func (s *server) serveRequest(cm *connManager, body []byte) {
 		fmt.Println("unmarshal socket body failed:", err)
 		return
 	}
-
+	fmt.Printf("serveRequest ---------------- rpcReq= %+v \n",rpcReq)
 	svrName := rpcReq.GetRpc() // 获取服务名 api-auth.Get
 	sn, mn, err := checkServiceName(svrName)
 	if err != nil {
 		return
 	}
 	if srv, ok := s.ServiceMap.Load(sn); ok {
-		if method, ok := srv.(service).methods[mn]; ok {
-
-			resp, err := method.Handler(srv.(service).server, context.TODO(), []byte(rpcReq.GetBody()))
+		if method, ok := srv.(*service).methods[mn]; ok {
+			resp, err := method.Handler(srv.(*service).server, context.TODO(), []byte(rpcReq.GetBody()))
 			if err != nil {
-				cm.writeResponse(svrName, []byte(err.Error()), pbBase.RpcCode_ERR)
+				cm.writeResponse(svrName, []byte(err.Error()), pbBase.RpcCode_ERR,rpcReq.Seq)
 				return
 			}
 			body, err := resp.Marshal() // 业务返回的包体
-			cm.writeResponse(svrName, body, pbBase.RpcCode_SUCCESS)
+			cm.writeResponse(svrName, body, pbBase.RpcCode_SUCCESS,rpcReq.Seq)
 			return
 		}
 		fmt.Printf("method %s not found in service %s\n", mn, sn)
@@ -239,17 +247,18 @@ func checkServiceName(name string) (sn, mn string, err error) {
 	return
 }
 
-func (cm *connManager)writeResponse(sname string, body []byte, code pbBase.RpcCode) {
+func (cm *connManager)writeResponse(sname string, body []byte, code pbBase.RpcCode,seq int32) {
 	rpcResp := new(pbBase.RpcResp)
 	rpcResp.Body = string(body)
 	rpcResp.Rpc = sname
 	rpcResp.Code = int32(code)
+	rpcResp.Seq = seq
 
 	dAtA, err := rpcResp.Marshal()
 	if err != nil {
 		fmt.Println("rpcResp.Marshal failed while write response for service ", sname)
 		//TODO:
 	}
-
+	fmt.Printf("writeResponse for service %s with resp = %+v\n",sname,rpcResp)
 	cm.chanResp <- Response{len:len(dAtA),body:dAtA}
 }

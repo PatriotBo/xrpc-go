@@ -21,7 +21,7 @@ message HelloReq {
     optional string msg = 2[(gogoproto.nullable) = false]; // 信息
 }
 
-message RpcResp {
+message HelloResp {
     optional int32   code  = 1[(gogoproto.nullable) = false]; // 响应码
     optional string  msg   = 2[(gogoproto.nullable) = false]; // 响应信息
     optional string  info  = 3[(gogoproto.nullable) = false]; // 信息

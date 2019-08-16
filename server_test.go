@@ -11,7 +11,7 @@ type AuthServer interface {
 	Get(ctx context.Context, req auth.AuthReq) (*auth.AuthResp, error)
 }
 
-func _Get_Handler(svr interface{}, ctx context.Context, body []byte) (protoI, error) {
+func _Get_Handler(svr interface{}, ctx context.Context, body []byte) (ProtoI, error) {
 	fmt.Println("_Get_Handler")
 	aReq := new(auth.AuthReq)
 	err := aReq.Unmarshal(body)

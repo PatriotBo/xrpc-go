@@ -1,4 +1,4 @@
-package example
+package main
 
 import (
 	"context"
@@ -6,20 +6,21 @@ import (
 	"xrpc-go/proto/hello"
 )
 
-type hello struct {
+type Hello struct {
 }
 
-var HelloWorld = &hello{}
+var mHelloWorld = &Hello{}
 
-func (h *hello)HelloWorld(ctx context.Context,req *pbHello.HelloReq,resp *pbHello.RpcResp)error {
+func (h *Hello)SayHello(ctx context.Context,req pbHello.HelloReq)(*pbHello.HelloResp,error){
 	fmt.Printf("********HelloWorld******** req:%v\n ",req)
 
 	uid := req.GetUid()
 	msg := req.GetMsg()
 
 	fmt.Printf("user[%d] says `%s` to the world \n",uid,msg)
+	resp := new(pbHello.HelloResp)
 	resp.Code = 0
 	resp.Msg = "success"
 	resp.Info = fmt.Sprintf("hello %d",uid)
-	return nil
+	return resp,nil
 }

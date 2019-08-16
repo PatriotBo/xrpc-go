@@ -123,15 +123,15 @@ func BenchmarkHelloReqProtoUnmarshal(b *testing.B) {
 	b.SetBytes(int64(total / b.N))
 }
 
-func TestRpcRespProto(t *testing.T) {
+func TestHelloRespProto(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
-	p := NewPopulatedRpcResp(popr, false)
+	p := NewPopulatedHelloResp(popr, false)
 	dAtA, err := github_com_gogo_protobuf_proto.Marshal(p)
 	if err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
-	msg := &RpcResp{}
+	msg := &HelloResp{}
 	if err := github_com_gogo_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
@@ -157,10 +157,10 @@ func TestRpcRespProto(t *testing.T) {
 	}
 }
 
-func TestRpcRespMarshalTo(t *testing.T) {
+func TestHelloRespMarshalTo(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
-	p := NewPopulatedRpcResp(popr, false)
+	p := NewPopulatedHelloResp(popr, false)
 	size := p.Size()
 	dAtA := make([]byte, size)
 	for i := range dAtA {
@@ -170,7 +170,7 @@ func TestRpcRespMarshalTo(t *testing.T) {
 	if err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
-	msg := &RpcResp{}
+	msg := &HelloResp{}
 	if err := github_com_gogo_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
@@ -185,12 +185,12 @@ func TestRpcRespMarshalTo(t *testing.T) {
 	}
 }
 
-func BenchmarkRpcRespProtoMarshal(b *testing.B) {
+func BenchmarkHelloRespProtoMarshal(b *testing.B) {
 	popr := math_rand.New(math_rand.NewSource(616))
 	total := 0
-	pops := make([]*RpcResp, 10000)
+	pops := make([]*HelloResp, 10000)
 	for i := 0; i < 10000; i++ {
-		pops[i] = NewPopulatedRpcResp(popr, false)
+		pops[i] = NewPopulatedHelloResp(popr, false)
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -203,18 +203,18 @@ func BenchmarkRpcRespProtoMarshal(b *testing.B) {
 	b.SetBytes(int64(total / b.N))
 }
 
-func BenchmarkRpcRespProtoUnmarshal(b *testing.B) {
+func BenchmarkHelloRespProtoUnmarshal(b *testing.B) {
 	popr := math_rand.New(math_rand.NewSource(616))
 	total := 0
 	datas := make([][]byte, 10000)
 	for i := 0; i < 10000; i++ {
-		dAtA, err := github_com_gogo_protobuf_proto.Marshal(NewPopulatedRpcResp(popr, false))
+		dAtA, err := github_com_gogo_protobuf_proto.Marshal(NewPopulatedHelloResp(popr, false))
 		if err != nil {
 			panic(err)
 		}
 		datas[i] = dAtA
 	}
-	msg := &RpcResp{}
+	msg := &HelloResp{}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		total += len(datas[i%10000])
@@ -246,16 +246,16 @@ func TestHelloReqJSON(t *testing.T) {
 		t.Fatalf("seed = %d, %#v !Json Equal %#v", seed, msg, p)
 	}
 }
-func TestRpcRespJSON(t *testing.T) {
+func TestHelloRespJSON(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
-	p := NewPopulatedRpcResp(popr, true)
+	p := NewPopulatedHelloResp(popr, true)
 	marshaler := github_com_gogo_protobuf_jsonpb.Marshaler{}
 	jsondata, err := marshaler.MarshalToString(p)
 	if err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
-	msg := &RpcResp{}
+	msg := &HelloResp{}
 	err = github_com_gogo_protobuf_jsonpb.UnmarshalString(jsondata, msg)
 	if err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
@@ -301,12 +301,12 @@ func TestHelloReqProtoCompactText(t *testing.T) {
 	}
 }
 
-func TestRpcRespProtoText(t *testing.T) {
+func TestHelloRespProtoText(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
-	p := NewPopulatedRpcResp(popr, true)
+	p := NewPopulatedHelloResp(popr, true)
 	dAtA := github_com_gogo_protobuf_proto.MarshalTextString(p)
-	msg := &RpcResp{}
+	msg := &HelloResp{}
 	if err := github_com_gogo_protobuf_proto.UnmarshalText(dAtA, msg); err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
@@ -318,12 +318,12 @@ func TestRpcRespProtoText(t *testing.T) {
 	}
 }
 
-func TestRpcRespProtoCompactText(t *testing.T) {
+func TestHelloRespProtoCompactText(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
-	p := NewPopulatedRpcResp(popr, true)
+	p := NewPopulatedHelloResp(popr, true)
 	dAtA := github_com_gogo_protobuf_proto.CompactTextString(p)
-	msg := &RpcResp{}
+	msg := &HelloResp{}
 	if err := github_com_gogo_protobuf_proto.UnmarshalText(dAtA, msg); err != nil {
 		t.Fatalf("seed = %d, err = %v", seed, err)
 	}
@@ -350,14 +350,14 @@ func TestHelloReqVerboseEqual(t *testing.T) {
 		t.Fatalf("%#v !VerboseEqual %#v, since %v", msg, p, err)
 	}
 }
-func TestRpcRespVerboseEqual(t *testing.T) {
+func TestHelloRespVerboseEqual(t *testing.T) {
 	popr := math_rand.New(math_rand.NewSource(time.Now().UnixNano()))
-	p := NewPopulatedRpcResp(popr, false)
+	p := NewPopulatedHelloResp(popr, false)
 	dAtA, err := github_com_gogo_protobuf_proto.Marshal(p)
 	if err != nil {
 		panic(err)
 	}
-	msg := &RpcResp{}
+	msg := &HelloResp{}
 	if err := github_com_gogo_protobuf_proto.Unmarshal(dAtA, msg); err != nil {
 		panic(err)
 	}
@@ -378,9 +378,9 @@ func TestHelloReqGoString(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-func TestRpcRespGoString(t *testing.T) {
+func TestHelloRespGoString(t *testing.T) {
 	popr := math_rand.New(math_rand.NewSource(time.Now().UnixNano()))
-	p := NewPopulatedRpcResp(popr, false)
+	p := NewPopulatedHelloResp(popr, false)
 	s1 := p.GoString()
 	s2 := fmt.Sprintf("%#v", p)
 	if s1 != s2 {
@@ -427,10 +427,10 @@ func BenchmarkHelloReqSize(b *testing.B) {
 	b.SetBytes(int64(total / b.N))
 }
 
-func TestRpcRespSize(t *testing.T) {
+func TestHelloRespSize(t *testing.T) {
 	seed := time.Now().UnixNano()
 	popr := math_rand.New(math_rand.NewSource(seed))
-	p := NewPopulatedRpcResp(popr, true)
+	p := NewPopulatedHelloResp(popr, true)
 	size2 := github_com_gogo_protobuf_proto.Size(p)
 	dAtA, err := github_com_gogo_protobuf_proto.Marshal(p)
 	if err != nil {
@@ -449,12 +449,12 @@ func TestRpcRespSize(t *testing.T) {
 	}
 }
 
-func BenchmarkRpcRespSize(b *testing.B) {
+func BenchmarkHelloRespSize(b *testing.B) {
 	popr := math_rand.New(math_rand.NewSource(616))
 	total := 0
-	pops := make([]*RpcResp, 1000)
+	pops := make([]*HelloResp, 1000)
 	for i := 0; i < 1000; i++ {
-		pops[i] = NewPopulatedRpcResp(popr, false)
+		pops[i] = NewPopulatedHelloResp(popr, false)
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -472,9 +472,9 @@ func TestHelloReqStringer(t *testing.T) {
 		t.Fatalf("String want %v got %v", s1, s2)
 	}
 }
-func TestRpcRespStringer(t *testing.T) {
+func TestHelloRespStringer(t *testing.T) {
 	popr := math_rand.New(math_rand.NewSource(time.Now().UnixNano()))
-	p := NewPopulatedRpcResp(popr, false)
+	p := NewPopulatedHelloResp(popr, false)
 	s1 := p.String()
 	s2 := fmt.Sprintf("%v", p)
 	if s1 != s2 {

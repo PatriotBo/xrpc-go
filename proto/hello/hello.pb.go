@@ -80,7 +80,7 @@ func (m *HelloReq) GetMsg() string {
 	return ""
 }
 
-type RpcResp struct {
+type HelloResp struct {
 	Code                 int32    `protobuf:"varint,1,opt,name=code" json:"code"`
 	Msg                  string   `protobuf:"bytes,2,opt,name=msg" json:"msg"`
 	Info                 string   `protobuf:"bytes,3,opt,name=info" json:"info"`
@@ -89,17 +89,17 @@ type RpcResp struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *RpcResp) Reset()      { *m = RpcResp{} }
-func (*RpcResp) ProtoMessage() {}
-func (*RpcResp) Descriptor() ([]byte, []int) {
+func (m *HelloResp) Reset()      { *m = HelloResp{} }
+func (*HelloResp) ProtoMessage() {}
+func (*HelloResp) Descriptor() ([]byte, []int) {
 	return fileDescriptor_49e10c42a6c052d6, []int{1}
 }
-func (m *RpcResp) XXX_Unmarshal(b []byte) error {
+func (m *HelloResp) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *RpcResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *HelloResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_RpcResp.Marshal(b, m, deterministic)
+		return xxx_messageInfo_HelloResp.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -109,33 +109,33 @@ func (m *RpcResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *RpcResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RpcResp.Merge(m, src)
+func (m *HelloResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HelloResp.Merge(m, src)
 }
-func (m *RpcResp) XXX_Size() int {
+func (m *HelloResp) XXX_Size() int {
 	return m.Size()
 }
-func (m *RpcResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_RpcResp.DiscardUnknown(m)
+func (m *HelloResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_HelloResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_RpcResp proto.InternalMessageInfo
+var xxx_messageInfo_HelloResp proto.InternalMessageInfo
 
-func (m *RpcResp) GetCode() int32 {
+func (m *HelloResp) GetCode() int32 {
 	if m != nil {
 		return m.Code
 	}
 	return 0
 }
 
-func (m *RpcResp) GetMsg() string {
+func (m *HelloResp) GetMsg() string {
 	if m != nil {
 		return m.Msg
 	}
 	return ""
 }
 
-func (m *RpcResp) GetInfo() string {
+func (m *HelloResp) GetInfo() string {
 	if m != nil {
 		return m.Info
 	}
@@ -144,27 +144,26 @@ func (m *RpcResp) GetInfo() string {
 
 func init() {
 	proto.RegisterType((*HelloReq)(nil), "pbHello.HelloReq")
-	proto.RegisterType((*RpcResp)(nil), "pbHello.RpcResp")
+	proto.RegisterType((*HelloResp)(nil), "pbHello.HelloResp")
 }
 
 func init() { proto.RegisterFile("hello/hello.proto", fileDescriptor_49e10c42a6c052d6) }
 
 var fileDescriptor_49e10c42a6c052d6 = []byte{
-	// 209 bytes of a gzipped FileDescriptorProto
+	// 206 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0xcc, 0x48, 0xcd, 0xc9,
 	0xc9, 0xd7, 0x07, 0x93, 0x7a, 0x05, 0x45, 0xf9, 0x25, 0xf9, 0x42, 0xec, 0x05, 0x49, 0x1e, 0x20,
 	0xae, 0x94, 0x6e, 0x7a, 0x66, 0x49, 0x46, 0x69, 0x92, 0x5e, 0x72, 0x7e, 0xae, 0x7e, 0x7a, 0x7e,
 	0x7a, 0xbe, 0x3e, 0x58, 0x3e, 0xa9, 0x34, 0x0d, 0xcc, 0x03, 0x73, 0xc0, 0x2c, 0x88, 0x3e, 0x25,
 	0x2b, 0x2e, 0x0e, 0xb0, 0xbe, 0xa0, 0xd4, 0x42, 0x21, 0x31, 0x2e, 0xe6, 0xd2, 0xcc, 0x14, 0x09,
 	0x46, 0x05, 0x46, 0x0d, 0x56, 0x27, 0x96, 0x13, 0xf7, 0xe4, 0x19, 0x82, 0x40, 0x02, 0x20, 0xf1,
-	0xdc, 0xe2, 0x74, 0x09, 0x26, 0x05, 0x46, 0x0d, 0x4e, 0x98, 0x78, 0x6e, 0x71, 0xba, 0x52, 0x28,
-	0x17, 0x7b, 0x50, 0x41, 0x72, 0x50, 0x6a, 0x71, 0x81, 0x90, 0x04, 0x17, 0x4b, 0x72, 0x7e, 0x4a,
-	0x2a, 0x8a, 0x5e, 0xb0, 0x08, 0x2e, 0xcd, 0x20, 0x1d, 0x99, 0x79, 0x69, 0xf9, 0x12, 0xcc, 0x48,
-	0x12, 0x60, 0x11, 0x27, 0x9d, 0x1b, 0x0f, 0xe5, 0x18, 0x1e, 0x3c, 0x94, 0x63, 0xfc, 0xf0, 0x50,
-	0x8e, 0xf1, 0xc7, 0x43, 0x39, 0xc6, 0x86, 0x47, 0x72, 0x8c, 0x2b, 0x1e, 0xc9, 0x31, 0xee, 0x78,
-	0x24, 0xc7, 0x78, 0xe0, 0x91, 0x1c, 0xe3, 0x89, 0x47, 0x72, 0x8c, 0x17, 0x1e, 0xc9, 0x31, 0x3e,
-	0x78, 0x24, 0xc7, 0x08, 0x08, 0x00, 0x00, 0xff, 0xff, 0x14, 0x6c, 0x28, 0x6a, 0x0c, 0x01, 0x00,
-	0x00,
+	0xdc, 0xe2, 0x74, 0x09, 0x26, 0x05, 0x46, 0x0d, 0x4e, 0x98, 0x78, 0x6e, 0x71, 0xba, 0x52, 0x38,
+	0x17, 0x27, 0x54, 0x6f, 0x71, 0x81, 0x90, 0x04, 0x17, 0x4b, 0x72, 0x7e, 0x4a, 0x2a, 0x8a, 0x6e,
+	0xb0, 0x08, 0x2e, 0xed, 0x20, 0x1d, 0x99, 0x79, 0x69, 0xf9, 0x12, 0xcc, 0x48, 0x12, 0x60, 0x11,
+	0x27, 0x9d, 0x1b, 0x0f, 0xe5, 0x18, 0x1e, 0x3c, 0x94, 0x63, 0xfc, 0xf0, 0x50, 0x8e, 0xf1, 0xc7,
+	0x43, 0x39, 0xc6, 0x86, 0x47, 0x72, 0x8c, 0x2b, 0x1e, 0xc9, 0x31, 0xee, 0x78, 0x24, 0xc7, 0x78,
+	0xe0, 0x91, 0x1c, 0xe3, 0x89, 0x47, 0x72, 0x8c, 0x17, 0x1e, 0xc9, 0x31, 0x3e, 0x78, 0x24, 0xc7,
+	0x08, 0x08, 0x00, 0x00, 0xff, 0xff, 0xba, 0x15, 0xcd, 0x3c, 0x0e, 0x01, 0x00, 0x00,
 }
 
 func (this *HelloReq) VerboseEqual(that interface{}) error {
@@ -233,7 +232,7 @@ func (this *HelloReq) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *RpcResp) VerboseEqual(that interface{}) error {
+func (this *HelloResp) VerboseEqual(that interface{}) error {
 	if that == nil {
 		if this == nil {
 			return nil
@@ -241,22 +240,22 @@ func (this *RpcResp) VerboseEqual(that interface{}) error {
 		return fmt.Errorf("that == nil && this != nil")
 	}
 
-	that1, ok := that.(*RpcResp)
+	that1, ok := that.(*HelloResp)
 	if !ok {
-		that2, ok := that.(RpcResp)
+		that2, ok := that.(HelloResp)
 		if ok {
 			that1 = &that2
 		} else {
-			return fmt.Errorf("that is not of type *RpcResp")
+			return fmt.Errorf("that is not of type *HelloResp")
 		}
 	}
 	if that1 == nil {
 		if this == nil {
 			return nil
 		}
-		return fmt.Errorf("that is type *RpcResp but is nil && this != nil")
+		return fmt.Errorf("that is type *HelloResp but is nil && this != nil")
 	} else if this == nil {
-		return fmt.Errorf("that is type *RpcResp but is not nil && this == nil")
+		return fmt.Errorf("that is type *HelloResp but is not nil && this == nil")
 	}
 	if this.Code != that1.Code {
 		return fmt.Errorf("Code this(%v) Not Equal that(%v)", this.Code, that1.Code)
@@ -272,14 +271,14 @@ func (this *RpcResp) VerboseEqual(that interface{}) error {
 	}
 	return nil
 }
-func (this *RpcResp) Equal(that interface{}) bool {
+func (this *HelloResp) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*RpcResp)
+	that1, ok := that.(*HelloResp)
 	if !ok {
-		that2, ok := that.(RpcResp)
+		that2, ok := that.(HelloResp)
 		if ok {
 			that1 = &that2
 		} else {
@@ -319,12 +318,12 @@ func (this *HelloReq) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *RpcResp) GoString() string {
+func (this *HelloResp) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := make([]string, 0, 7)
-	s = append(s, "&pbHello.RpcResp{")
+	s = append(s, "&pbHello.HelloResp{")
 	s = append(s, "Code: "+fmt.Sprintf("%#v", this.Code)+",\n")
 	s = append(s, "Msg: "+fmt.Sprintf("%#v", this.Msg)+",\n")
 	s = append(s, "Info: "+fmt.Sprintf("%#v", this.Info)+",\n")
@@ -377,7 +376,7 @@ func (m *HelloReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *RpcResp) Marshal() (dAtA []byte, err error) {
+func (m *HelloResp) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -387,12 +386,12 @@ func (m *RpcResp) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *RpcResp) MarshalTo(dAtA []byte) (int, error) {
+func (m *HelloResp) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *RpcResp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *HelloResp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -441,8 +440,8 @@ func NewPopulatedHelloReq(r randyHello, easy bool) *HelloReq {
 	return this
 }
 
-func NewPopulatedRpcResp(r randyHello, easy bool) *RpcResp {
-	this := &RpcResp{}
+func NewPopulatedHelloResp(r randyHello, easy bool) *HelloResp {
+	this := &HelloResp{}
 	this.Code = int32(r.Int31())
 	if r.Intn(2) == 0 {
 		this.Code *= -1
@@ -542,7 +541,7 @@ func (m *HelloReq) Size() (n int) {
 	return n
 }
 
-func (m *RpcResp) Size() (n int) {
+func (m *HelloResp) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -577,11 +576,11 @@ func (this *HelloReq) String() string {
 	}, "")
 	return s
 }
-func (this *RpcResp) String() string {
+func (this *HelloResp) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&RpcResp{`,
+	s := strings.Join([]string{`&HelloResp{`,
 		`Code:` + fmt.Sprintf("%v", this.Code) + `,`,
 		`Msg:` + fmt.Sprintf("%v", this.Msg) + `,`,
 		`Info:` + fmt.Sprintf("%v", this.Info) + `,`,
@@ -703,7 +702,7 @@ func (m *HelloReq) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *RpcResp) Unmarshal(dAtA []byte) error {
+func (m *HelloResp) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -726,10 +725,10 @@ func (m *RpcResp) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: RpcResp: wiretype end group for non-group")
+			return fmt.Errorf("proto: HelloResp: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: RpcResp: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: HelloResp: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
